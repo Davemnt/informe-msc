@@ -1,0 +1,424 @@
+/* ===============================================
+   INFORME DEL SUMO CONSEJO - ESTILOS GLOBALES
+   =============================================== */
+
+/* 🎨 Variables CSS - Paleta de colores especificada */
+:root {
+  /* Colores neutros principales */
+  --color-blanco: #ffffff;
+  --color-negro: #000000;
+  --color-grafito: #2d2d2d;
+  --color-gris-claro: #f5f5f5;
+  --color-gris-medio: #cccccc;
+  --color-gris-oscuro: #666666;
+  
+  /* Color naranja - accent principal */
+  --color-naranja: #ff6b35;
+  --color-naranja-hover: #e55a2b;
+  --color-naranja-claro: #ff8c5a;
+  
+  /* Tipografía */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  
+  /* Espaciado y layout */
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+  
+  /* Contenedor principal */
+  --max-width: 800px;
+  --padding-mobile: 20px;
+  --padding-desktop: 40px;
+}
+
+/* 🔄 Reset y base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  color: var(--color-grafito);
+  background-color: var(--color-gris-claro);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 🏗️ Layout principal */
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--padding-mobile);
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: var(--max-width);
+  background: var(--color-blanco);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  padding: var(--padding-mobile);
+  margin: 20px 0;
+}
+
+/* 📱 Responsive - Desktop */
+@media (min-width: 768px) {
+  .main-container {
+    padding: var(--padding-desktop);
+  }
+  
+  .content-wrapper {
+    padding: var(--padding-desktop);
+  }
+}
+
+/* 🎯 Títulos y texto */
+.page-title {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-grafito);
+  text-align: center;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 1.125rem;
+  color: var(--color-gris-oscuro);
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-grafito);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-gris-medio);
+}
+
+/* 🔘 Botones - Especificación exacta */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 48px;
+  gap: 8px;
+}
+
+/* Botón primario - NARANJA con texto BLANCO */
+.btn-primary {
+  background-color: var(--color-naranja);
+  color: var(--color-blanco);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-naranja-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Botón secundario */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-grafito);
+  border: 2px solid var(--color-gris-medio);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-gris-claro);
+  border-color: var(--color-gris-oscuro);
+}
+
+/* Botón de tamaño grande */
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+  min-height: 56px;
+}
+
+/* Botón de ancho completo */
+.btn-full {
+  width: 100%;
+}
+
+/* Grupo de botones */
+.button-group {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .button-group .btn {
+    width: 100%;
+  }
+}
+
+/* 📝 Formularios */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-grafito);
+  margin-bottom: 0.5rem;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: var(--color-naranja);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-gris-medio);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  transition: var(--transition);
+  background-color: var(--color-blanco);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-naranja);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-textarea {
+  min-height: 220px;
+  resize: vertical;
+}
+
+/* Permitir que el textarea crezca y haga scroll sin limitar altura */
+.form-textarea {
+  max-height: none;
+  overflow: auto;
+}
+
+/* Ajustes responsivos: textarea más pequeño en móviles pero aún grande */
+@media (max-width: 768px) {
+  .form-textarea {
+    min-height: 160px;
+  }
+  #informeDetallado {
+    min-height: 200px;
+  }
+}
+
+/* Informe detallado más alto por defecto en pantallas grandes */
+#informeDetallado {
+  min-height: 260px;
+}
+
+/* 🔘 Radio buttons y checkboxes personalizados */
+.radio-group,
+.checkbox-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.radio-item,
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.radio-item:hover,
+.checkbox-item:hover {
+  background-color: var(--color-gris-claro);
+}
+
+.radio-item input[type="radio"],
+.checkbox-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* 📋 Cards */
+.card {
+  background: var(--color-blanco);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-gris-medio);
+}
+
+.card-header {
+  border-bottom: 1px solid var(--color-gris-medio);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-grafito);
+  margin: 0;
+}
+
+/* 🚨 Mensajes de estado */
+.message {
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.message-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.message-info {
+  background-color: #cce7ff;
+  color: #004085;
+  border: 1px solid #99d6ff;
+}
+
+/* ⚡ Loading spinner */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-gris-medio);
+  border-radius: 50%;
+  border-top-color: var(--color-naranja);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 🔍 Utilidades */
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+/* 📱 Responsive helpers */
+@media (max-width: 767px) {
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .content-wrapper {
+    margin: 10px 0;
+  }
+  
+  .radio-group,
+  .checkbox-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* 🎯 Estados de focus para accesibilidad */
+.btn:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: 2px solid var(--color-naranja);
+  outline-offset: 2px;
+}
+
+/* 🌟 Animaciones suaves */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

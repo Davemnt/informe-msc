@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe del Sumo Consejo</title>
+    <meta name="description" content="Sistema profesional para la recepción y administración de informes institucionales">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos específicos para la página de inicio */
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--color-naranja);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .hero-icon::before {
+            content: "📋";
+            font-size: 2rem;
+        }
+
+        .welcome-text {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--color-gris-oscuro);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: var(--color-blanco);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--color-gris-medio);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-grafito);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.875rem;
+            color: var(--color-gris-oscuro);
+        }
+
+        .footer-section {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-gris-medio);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            color: var(--color-gris-oscuro);
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 0;
+            }
+
+            .hero-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .hero-icon::before {
+                font-size: 1.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin: 2rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="main-container">
+        <div class="content-wrapper fade-in">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-icon"></div>
+                
+                <h1 class="page-title">Informe del Sumo Consejo</h1>
+                
+                <p class="page-subtitle">
+                    Sistema profesional para la recepción y administración de informes institucionales
+                </p>
+
+                <div class="welcome-text">
+                    <p>
+                        Bienvenido al sistema oficial de informes. Aquí podrás enviar de manera 
+                        sencilla y organizada toda la información requerida sobre las organizaciones 
+                        y unidades asignadas, contribuyendo al seguimiento efectivo de las actividades institucionales.
+                    </p>
+                </div>
+
+                <!-- Botones principales de navegación -->
+                <div class="button-group">
+                    <a href="formulario.html" class="btn btn-primary btn-large">
+                        📝 Enviar Informe
+                    </a>
+                    <a href="admin.html" class="btn btn-secondary btn-large">
+                        👨‍💼 Administrador
+                    </a>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">Formulario Dinámico</h3>
+                    <p class="feature-description">
+                        Secciones que se adaptan automáticamente según tus asignaciones organizacionales
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📅</span>
+                    <h3 class="feature-title">Registro Automático</h3>
+                    <p class="feature-description">
+                        La fecha de cada informe se registra automáticamente al momento del envío
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">👥</span>
+                    <h3 class="feature-title">Agrupación por Persona</h3>
+                    <p class="feature-description">
+                        Los informes se organizan automáticamente por persona para un mejor seguimiento
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔐</span>
+                    <h3 class="feature-title">Panel Administrativo</h3>
+                    <p class="feature-description">
+                        Acceso completo para administradores con filtros avanzados y exportación
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">Diseño Responsive</h3>
+                    <p class="feature-description">
+                        Funciona perfectamente en computadoras, tablets y dispositivos móviles
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">✅</span>
+                    <h3 class="feature-title">Validaciones Inteligentes</h3>
+                    <p class="feature-description">
+                        Sistema de validaciones que garantiza la completitud de la información
+                    </p>
+                </div>
+            </section>
+
+            <!-- Instructions Section -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📖 Instrucciones de Uso</h2>
+                </div>
+                
+                <div class="welcome-text text-left">
+                    <p><strong>Para enviar un informe:</strong></p>
+                    <ul style="margin: 1rem 0 1rem 2rem;">
+                        <li>Haz clic en "Enviar Informe"</li>
+                        <li>Completa tus datos personales</li>
+                        <li>Selecciona las organizaciones que tienes asignadas</li>
+                        <li>Indica las unidades que manejas</li>
+                        <li>Completa la información específica requerida</li>
+                        <li>Envía el formulario</li>
+                    </ul>
+
+                    <p><strong>Para administradores:</strong></p>
+                    <ul style="margin: 1rem 0 1rem 2rem;">
+                        <li>Accede al panel administrativo</li>
+                        <li>Ingresa con tus credenciales</li>
+                        <li>Visualiza todos los informes recibidos</li>
+                        <li>Utiliza los filtros para encontrar información específica</li>
+                        <li>Exporta los datos según sea necesario</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer-section">
+                <p class="footer-text">
+                    © 2024 Informe del Sumo Consejo • Sistema desarrollado para uso institucional
+                </p>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        // Animación de entrada
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aplicar animación fade-in a las tarjetas de características
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+
+            // Agregar efectos interactivos a los botones
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Verificar si hay mensajes de éxito en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                showSuccessMessage('¡Informe enviado exitosamente!');
+            }
+        });
+
+        // Función para mostrar mensajes de éxito
+        function showSuccessMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-success fade-in';
+            messageDiv.textContent = message;
+            
+            const contentWrapper = document.querySelector('.content-wrapper');
+            contentWrapper.insertBefore(messageDiv, contentWrapper.firstChild);
+
+            // Remover el mensaje después de 5 segundos
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Verificación de disponibilidad del servidor
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/health');
+                if (!response.ok) {
+                    console.log('Servidor no disponible, usando modo offline');
+                }
+            } catch (error) {
+                console.log('Servidor no disponible, usando modo offline');
+            }
+        }
+
+        // Verificar estado del servidor al cargar
+        checkServerStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "informe-sumo-consejo",
+  "version": "1.0.0",
+  "description": "Aplicación web para recepción y administración de informes del Sumo Consejo",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "install-deps": "npm install"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "helmet": "^6.1.5",
+    "express-rate-limit": "^6.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "author": "Desarrollador Senior Full-Stack",
+  "license": "MIT"
+}

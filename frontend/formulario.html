@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Informe - Sumo Consejo</title>
+    <meta name="description" content="Formulario dinámico para el envío de informes institucionales">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos específicos del formulario */
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--color-gris-medio);
+        }
+
+        .form-section {
+            background: var(--color-blanco);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--color-naranja);
+        }
+
+        .conditional-section {
+            transition: all 0.3s ease;
+            overflow: visible; /* IMPORTANTE */
+        }
+
+        .conditional-section.hidden {
+            display: none;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .dynamic-list {
+            margin-top: 1rem;
+        }
+
+        .dynamic-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--color-gris-claro);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--color-gris-medio);
+        }
+
+        .dynamic-item input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .remove-item {
+            background: transparent;
+            border: none;
+            color: var(--color-naranja);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .remove-item:hover {
+            background: var(--color-naranja);
+            color: var(--color-blanco);
+        }
+
+        .submit-container {
+            position: sticky;
+            bottom: 0;
+            background: var(--color-gris-claro);
+            padding: 2rem;
+            margin: 2rem -2rem -2rem;
+            border-top: 2px solid var(--color-gris-medio);
+        }
+
+        .validation-error {
+            color: var(--color-naranja);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .validation-error.show {
+            display: block;
+        }
+
+        .form-progress {
+            background: var(--color-gris-medio);
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .form-progress-bar {
+            background: var(--color-naranja);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .dynamic-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+        }
+
+        /* En pantallas pequeñas, no mantener el contenedor de envío fijo; mostrarlo debajo */
+        @media (max-width: 768px) {
+            .submit-container {
+                position: static;
+                bottom: auto;
+                margin: 2rem 0 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="main-container">
+        <div class="content-wrapper form-container fade-in">
+            <!-- Header del formulario -->
+            <div class="form-header">
+                <h1 class="page-title">📝 Formulario de Informe</h1>
+                <p class="page-subtitle">
+                    Complete la información solicitada. Los campos marcados con (*) son obligatorios.
+                </p>
+                
+                <!-- Barra de progreso -->
+                <div class="form-progress">
+                    <div class="form-progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- Mensaje de estado -->
+            <div id="messageContainer"></div>
+
+            <!-- Formulario principal -->
+            <form id="informeForm" novalidate>
+                
+                <!-- 1️⃣ DATOS DEL INFORMANTE -->
+                <section class="form-section">
+                    <h2 class="section-title">👤 Datos del Informante</h2>
+                    
+                    <div class="form-group">
+                        <label for="nombre" class="form-label required">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" class="form-input" required>
+                        <div class="validation-error" id="nombreError">El nombre es obligatorio</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apellido" class="form-label required">Apellido</label>
+                        <input type="text" id="apellido" name="apellido" class="form-input" required>
+                        <div class="validation-error" id="apellidoError">El apellido es obligatorio</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha del Informe</label>
+                        <input type="text" value="Se registrará automáticamente al enviar" class="form-input" disabled>
+                        <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                            La fecha se genera automáticamente por el sistema
+                        </small>
+                    </div>
+                </section>
+
+                <!-- 2️⃣ ORGANIZACIONES -->
+                <section class="form-section">
+                    <h2 class="section-title">🏢 Organizaciones</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">¿Tiene alguna organización asignada?</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="tiene_organizaciones" value="si" id="orgSi">
+                                <span>Sí</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="tiene_organizaciones" value="no" id="orgNo">
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sección condicional de organizaciones -->
+                    <div class="conditional-section hidden" id="organizacionesSection">
+                        <div class="form-group">
+                            <label class="form-label">Seleccione las organizaciones que tiene asignadas:</label>
+                            <div class="checkbox-grid" id="organizacionesCheckboxes">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Hombres Jóvenes">
+                                    <span>Hombres Jóvenes</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Mujeres Jóvenes">
+                                    <span>Mujeres Jóvenes</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Primaria">
+                                    <span>Primaria</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="JAS">
+                                    <span>JAS</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Obra Misional">
+                                    <span>Obra Misional</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Autosuficiencia">
+                                    <span>Autosuficiencia</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Sociedad de Socorro">
+                                    <span>Sociedad de Socorro</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Historia Familiar y Templo">
+                                    <span>Historia Familiar y Templo</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Escuela Dominical">
+                                    <span>Escuela Dominical</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Seminario">
+                                    <span>Seminario</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="Instituto">
+                                    <span>Instituto</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="organizaciones" value="AS">
+                                    <span>AS</span>
+                                </label>
+                            </div>
+                            <div id="organizacionesSummary" style="margin-top:0.75rem;color:var(--color-gris-oscuro);font-size:0.9rem;">
+                                Seleccionadas: 0
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3️⃣ UNIDADES / BARRIOS -->
+                <section class="form-section">
+                    <h2 class="section-title">🏛️ Unidades / Barrios</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">¿Tiene alguna unidad asignada?</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="tiene_unidades" value="si" id="unidadSi">
+                                <span>Sí</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="tiene_unidades" value="no" id="unidadNo">
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sección condicional de unidades -->
+                    <div class="conditional-section hidden" id="unidadesSection">
+                        <div class="form-group">
+                            <label class="form-label">Seleccione las unidades que tiene asignadas:</label>
+                            <div class="checkbox-grid" id="unidadesCheckboxes">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Aldo Bonzi">
+                                    <span>Aldo Bonzi</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Ciudad Evita 1">
+                                    <span>Ciudad Evita 1</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Ciudad Evita 2">
+                                    <span>Ciudad Evita 2</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Cristianía">
+                                    <span>Cristianía</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Villa Celina">
+                                    <span>Villa Celina</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="unidades" value="Villa Madero">
+                                    <span>Villa Madero</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🔹 SECCIÓN CONDICIONAL – SI TIENE UNIDAD -->
+                <div id="unidadConditionalSections" class="hidden">
+
+                    <!-- 4️⃣ FUTUROS ÉLDERES -->
+                    <section class="form-section">
+                        <h2 class="section-title">👨‍🎓 Futuros Élderes</h2>
+                        
+                        <div class="form-group">
+                            <label class="form-label">En la unidad, ¿están trabajando con nombres de futuros élderes?</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="trabajo_futuros_elderes" value="si" id="futurosSi">
+                                    <span>Sí</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="trabajo_futuros_elderes" value="no" id="futurosNo">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Lista dinámica de futuros élderes -->
+                        <div class="conditional-section hidden" id="futurosElderesSection">
+                            <div class="form-group">
+                                <label class="form-label">Nombres de futuros élderes:</label>
+                                <div class="dynamic-list" id="futurosElderesList">
+                                    <!-- Los campos se generarán dinámicamente -->
+                                </div>
+                                <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                                    Al completar un campo, automáticamente aparecerá uno nuevo debajo
+                                </small>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 5️⃣ REUNIÓN DE PRESIDENCIA -->
+                    <section class="form-section">
+                        <h2 class="section-title">👥 Reunión de Presidencia</h2>
+                        
+                        <div class="form-group">
+                            <label class="form-label">¿Tuvieron su reunión de presidencia este mes?</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="reunion_presidencia" value="si">
+                                    <span>Sí</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="reunion_presidencia" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 6️⃣ MINISTRACIÓN -->
+                    <section class="form-section">
+                        <h2 class="section-title">🤝 Ministración</h2>
+                        
+                        <div class="form-group">
+                            <label class="form-label">¿Llevaron a cabo entrevistas de ministración?</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="entrevistas_ministracion" value="si">
+                                    <span>Sí</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="entrevistas_ministracion" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 7️⃣ INFORME DETALLADO (OBLIGATORIO CON UNIDAD) -->
+                    <section class="form-section">
+                        <h2 class="section-title">📋 Informe Detallado</h2>
+                        
+                        <div class="form-group">
+                            <label for="informeDetallado" class="form-label required">Informe detallado</label>
+                            <textarea 
+                                id="informeDetallado" 
+                                name="informe_detallado" 
+                                class="form-textarea" 
+                                rows="12"
+                                placeholder="Proporcione un informe detallado de las actividades, avances y observaciones relevantes..."
+                                required
+                            ></textarea>
+                            <div class="validation-error" id="informeDetalladoError">
+                                El informe detallado es obligatorio cuando tiene unidades asignadas
+                            </div>
+                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                                Sin límite de caracteres. Sea específico y detallado en su informe.
+                            </small>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- 🔹 CASO ESPECIAL – SOLO ORGANIZACIÓN (SIN UNIDAD) -->
+                <div id="soloOrganizacionSection" class="hidden">
+                    
+                    <!-- REUNIÓN DE PRESIDENCIA (ORGANIZACIÓN) -->
+                    <section class="form-section">
+                        <h2 class="section-title">👥 Reunión de Presidencia de Organización</h2>
+                        
+                        <div class="form-group">
+                            <label class="form-label">¿Tuvo reunión de presidencia este mes?</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="reunion_presidencia_org" value="si">
+                                    <span>Sí</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="reunion_presidencia_org" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- INFORME DETALLADO (ORGANIZACIÓN) -->
+                    <section class="form-section">
+                        <h2 class="section-title">📋 Informe de Organización</h2>
+                        
+                        <div class="form-group">
+                            <label for="informeOrganizacion" class="form-label">Informe detallado</label>
+                            <textarea 
+                                id="informeOrganizacion" 
+                                name="informe_organizacion" 
+                                class="form-textarea" 
+                                rows="12"
+                                placeholder="Proporcione un informe sobre las actividades y avances de su organización..."
+                            ></textarea>
+                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                                Describa las actividades, logros y desafíos de su organización
+                            </small>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- 📤 BOTÓN DE ENVÍO -->
+                <div class="submit-container">
+                    <button type="submit" class="btn btn-primary btn-large btn-full" id="submitBtn">
+                        <span id="submitText">📤 Enviar Informe</span>
+                        <span id="submitLoading" class="loading hidden"></span>
+                    </button>
+                    
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="index.html" class="btn btn-secondary">
+                            ← Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Script del formulario -->
+    <!-- Firebase SDK (compat) + init -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/formulario.js"></script>
+</body>
+</html>
