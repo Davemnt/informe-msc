@@ -31,6 +31,20 @@ class FormularioDinamico {
 
         // Checkboxes de organizaciones y unidades para detectar cambios
         document.addEventListener('change', (e) => {
+            // Si el usuario marca/desmarca unidades, sincronizar el radio de "tiene_unidades"
+            if (e.target.name === 'unidades') {
+                const anyChecked = document.querySelectorAll('input[name="unidades"]:checked').length > 0;
+                const unidadSi = document.getElementById('unidadSi');
+                const unidadNo = document.getElementById('unidadNo');
+                if (anyChecked && unidadSi && !unidadSi.checked) {
+                    unidadSi.checked = true;
+                    this.handleUnidadesChange();
+                } else if (!anyChecked && unidadNo && !unidadNo.checked) {
+                    unidadNo.checked = true;
+                    this.handleUnidadesChange();
+                }
+            }
+
             if (e.target.name === 'organizaciones' || e.target.name === 'unidades') {
                 this.checkSpecialCase();
                 this.updateProgress();
