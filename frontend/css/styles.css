@@ -413,6 +413,54 @@ body {
   outline-offset: 2px;
 }
 
+/* Estilos para campos dinámicos (listas añadibles) - evitar estilos de foco extraños */
+.dynamic-list {
+  margin-top: 1rem;
+}
+
+.dynamic-item {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--color-blanco);
+  border-radius: calc(var(--border-radius) - 2px);
+  border: 1px solid var(--color-gris-medio);
+}
+
+.dynamic-item input[type="text"],
+.dynamic-item input[type="email"],
+.dynamic-item input[type="search"],
+.dynamic-item textarea {
+  flex: 1;
+  margin: 0;
+  padding: 10px 14px;
+  border: 2px solid var(--color-gris-medio);
+  border-radius: 6px;
+  background: var(--color-blanco);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  transition: var(--transition);
+  box-sizing: border-box;
+  min-width: 0; /* allow flex children to shrink instead of overflowing */
+}
+
+.dynamic-item input:focus,
+.dynamic-item textarea:focus {
+  outline: none;
+  border-color: var(--color-naranja);
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.08);
+  background: var(--color-blanco);
+}
+
+/* Ajustes del botón de eliminar para no empujar el input fuera */
+.remove-item {
+  flex: none;
+  align-self: center;
+  margin-left: 8px;
+}
+
 /* 🌟 Animaciones suaves */
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;

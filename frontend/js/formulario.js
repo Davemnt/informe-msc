@@ -160,6 +160,8 @@ class FormularioDinamico {
         });
 
         container.appendChild(fieldDiv);
+        // Ajustar alturas de las secciones abiertas para contener el nuevo campo
+        this.adjustAncestorHeights(container);
         return input;
     }
 
@@ -181,7 +183,24 @@ class FormularioDinamico {
         setTimeout(() => {
             fieldDiv.remove();
             this.updateProgress();
+            // Ajustar alturas después de la eliminación
+            this.adjustAncestorHeights(container);
         }, 300);
+    }
+
+    // Ajusta maxHeight de ancestros tipo 'conditional-section' o 'form-section' abiertos
+    adjustAncestorHeights(el) {
+        let node = el;
+        while (node && node !== document.body) {
+            if (node.classList && (node.classList.contains('conditional-section') || node.classList.contains('form-section'))) {
+                if (!node.classList.contains('hidden')) {
+                    // Forzar recálculo del height para que el contenedor crezca con su contenido
+                    node.style.maxHeight = node.scrollHeight + 'px';
+                    node.style.opacity = '1';
+                }
+            }
+            node = node.parentElement;
+        }
     }
 
     clearFuturosElderes() {
@@ -192,18 +211,21 @@ class FormularioDinamico {
 
     // 👁️ Mostrar/ocultar secciones con animación
     showSection(section) {
+        // Mostrar y permitir que el contenido expanda el contenedor de forma natural
         section.classList.remove('hidden');
-        setTimeout(() => {
-            section.style.maxHeight = section.scrollHeight + 'px';
-            section.style.opacity = '1';
-        }, 10);
+        // Eliminar cualquier restricción previa de altura para que el box crezca con su contenido
+        section.style.maxHeight = 'none';
+        // Animar opacidad para una transición suave
+        setTimeout(() => { section.style.opacity = '1'; }, 10);
     }
 
     hideSection(section) {
-        section.style.maxHeight = '0';
+        // Animar opacidad y luego ocultar completamente
         section.style.opacity = '0';
         setTimeout(() => {
+            // Restaurar estado oculto y limpiar maxHeight
             section.classList.add('hidden');
+            section.style.maxHeight = '';
         }, 300);
     }
 
