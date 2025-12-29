@@ -18,66 +18,53 @@ cd informe-sumo-consejo
 # O descomprimir si descargaste un ZIP
 ```
 
+### Cambiar Puerto del Servidor
+# Guía de Instalación y Configuración
+
+## 📋 Requisitos Previos
+
+- **Node.js** versión 16 o superior
+- **npm** (viene incluido con Node.js)
+- **Navegador web** moderno (Chrome, Firefox, Safari, Edge)
+
+## 🚀 Instalación Rápida
+
+### 1. Clonar o descargar el proyecto
+
+```bash
+# Si tienes git instalado
+git clone <url-del-repositorio>
+cd informe-sumo-consejo
+
+# O descomprimir si descargaste un ZIP
+```
+
 ### 2. Instalar dependencias
 
 ```bash
 npm install
 ```
 
-### 3. Iniciar la aplicación
+### 3. Desplegar en Firebase Hosting
 
 ```bash
-# Modo desarrollo (con reinicio automático)
-npm run dev
-
-# Modo producción
-npm start
+firebase deploy --only hosting
 ```
 
 ### 4. Acceder a la aplicación
 
-Una vez iniciado el servidor, abrir en el navegador:
+Una vez desplegado, abrir en el navegador:
 
-- **Página Principal:** http://localhost:3000
-- **Formulario de Informes:** http://localhost:3000/formulario  
-- **Panel Administrativo:** http://localhost:3000/admin
+- **Frontend:** https://informe-msc.firebaseapp.com
+- **Panel Administrativo:** https://informe-msc.firebaseapp.com/admin
 
 ## 🔐 Acceso Administrativo
 
-**Credenciales por defecto:**
-- Usuario: `admin`
-- Contraseña: `admin123`
-
-> ⚠️ **Importante:** Cambiar estas credenciales en producción modificando el archivo `backend/database.js`
+- Acceso mediante autenticación Firebase (email y contraseña configurados en Firestore/Auth)
 
 ## 📁 Estructura de Archivos
 
 ```
-informe-sumo-consejo/
-├── backend/
-│   ├── server.js          # Servidor Express principal
-│   ├── database.js        # Configuración SQLite y modelos
-│   └── informes.db       # Base de datos (se crea automáticamente)
-├── frontend/
-│   ├── index.html        # Página de inicio
-│   ├── formulario.html   # Formulario de informes
-│   ├── admin.html        # Panel administrativo
-│   ├── css/
-│   │   └── styles.css    # Estilos globales
-│   └── js/
-│       ├── formulario.js # Lógica del formulario
-│       └── admin.js      # Lógica del panel admin
-├── package.json          # Configuración y dependencias
-└── README.md            # Documentación
-```
-
-## ⚙️ Configuración Avanzada
-
-### Cambiar Puerto del Servidor
-
-Crear un archivo `.env` en la raíz del proyecto:
-
-```env
 PORT=8080
 JWT_SECRET=tu-clave-secreta-muy-segura-aqui
 ```
@@ -87,6 +74,7 @@ JWT_SECRET=tu-clave-secreta-muy-segura-aqui
 La base de datos SQLite se encuentra en `backend/informes.db`. Para hacer backup:
 
 ```bash
+```
 # Copiar el archivo de base de datos
 cp backend/informes.db backup/informes_backup_$(date +%Y%m%d).db
 ```

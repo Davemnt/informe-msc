@@ -46,6 +46,18 @@
       }
     },
 
+    async deleteInforme(id) {
+      // Elimina un informe por ID en Firestore
+      try {
+        await db.collection('informes').doc(id).delete();
+        console.info('firebaseApp.deleteInforme: eliminado documento id=', id);
+        return true;
+      } catch (err) {
+        console.error('firebaseApp.deleteInforme error:', err);
+        throw err;
+      }
+    },
+
     async signIn(email, password) {
       const userCred = await auth.signInWithEmailAndPassword(email, password);
       return userCred.user;

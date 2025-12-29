@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
+    <!DOCTYPE html>
+    <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -291,9 +291,161 @@
         .tab-content.active {
             display: block;
         }
+        /* ====== Ajustes específicos para el modal de 'Nueva Pregunta' ====== */
+        #admin_modalPregunta .modal-content {
+            max-width: 900px;
+        }
+
+        .question-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 0.9rem;
+        }
+
+        .question-text {
+            flex: 2;
+        }
+
+        .question-type {
+            flex: 0 0 160px;
+        }
+
+        .question-orden {
+            flex: 0 0 90px;
+        }
+
+        .question-activa {
+            flex: 0 0 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .question-actions {
+            flex: 0 0 40px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .admin-pregunta-texto {
+            font-size: 1.125rem;
+            padding: 14px 16px;
+        }
+
+        .admin_removeRow {
+            align-self: flex-start;
+            min-width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 700px) {
+            .question-row {
+                flex-direction: column;
+            }
+            .question-type,
+            .question-orden,
+            .question-activa,
+            .question-actions {
+                flex: none;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Modales moved here to avoid DOM issues -->
+    <!-- Modal para editar pregunta personalizada -->
+    <div id="admin_modalEditarPregunta" class="modal">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header modal-pregunta-header">
+                <h2>✏️ Editar Pregunta</h2>
+                <span class="close" onclick="admin.closeEditarPreguntaModal()">&times;</span>
+            </div>
+            <form id="admin_formEditarPregunta" style="padding:1.5rem;">
+                <input type="hidden" id="admin_editarPreguntaId">
+                <div class="form-group">
+                    <label for="admin_editarPreguntaTexto" class="form-label required">Texto de la pregunta</label>
+                    <input type="text" id="admin_editarPreguntaTexto" name="editarPreguntaTexto" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin_editarPreguntaTipo" class="form-label">Tipo</label>
+                    <select id="admin_editarPreguntaTipo" name="editarPreguntaTipo" class="form-select">
+                        <option value="texto">Texto</option>
+                        <option value="numero">Número</option>
+                        <option value="fecha">Fecha</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="admin_editarPreguntaOrden" class="form-label">Orden</label>
+                    <input type="number" id="admin_editarPreguntaOrden" name="editarPreguntaOrden" class="form-input" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="admin_editarPreguntaActiva" class="form-label">Activa</label>
+                    <input type="checkbox" id="admin_editarPreguntaActiva" name="editarPreguntaActiva" />
+                </div>
+                <div style="text-align:right;">
+                    <button type="button" class="btn btn-secondary" onclick="admin.closeEditarPreguntaModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Modal para agregar pregunta personalizada -->
+    <div id="admin_modalPregunta" class="modal">
+        <div class="modal-content">
+            <div class="modal-header modal-pregunta-header">
+                <h2>➕ Nueva Pregunta</h2>
+                <span class="close" onclick="admin.closePreguntaModal()">&times;</span>
+            </div>
+            <form id="admin_formPregunta" style="padding:1.5rem;">
+                <p style="margin-top:0; color:var(--color-gris-oscuro);">Agrega una o más preguntas. Al comenzar a escribir en la última fila se añadirá otra automáticamente.</p>
+                <div id="admin_newQuestionsContainer">
+                    <!-- fila de pregunta (se duplicará dinámicamente) -->
+                    <div class="question-row">
+                        <div class="question-text">
+                            <label class="form-label required">Texto de la pregunta</label>
+                            <input type="text" name="preguntaTexto" class="form-input admin_row_preguntaTexto admin-pregunta-texto" required>
+                        </div>
+                        <div class="question-type">
+                            <label class="form-label">Tipo <span title="Tipo: 'Texto' = campo libre; 'Número' = campo numérico; 'Fecha' = selector de fecha">❔</span></label>
+                            <select name="preguntaTipo" class="form-select admin_row_preguntaTipo">
+                                <option value="texto">Texto</option>
+                                <option value="numero">Número</option>
+                                <option value="fecha">Fecha</option>
+                            </select>
+                        </div>
+                        <div class="question-orden">
+                            <label class="form-label">Orden <span title="Orden determina la posición en el formulario; números menores aparecen primero">❔</span></label>
+                            <input type="number" name="preguntaOrden" class="form-input admin_row_preguntaOrden" value="0" min="0">
+                        </div>
+                        <div class="question-activa">
+                            <label class="form-label">Activa</label>
+                            <input type="checkbox" name="preguntaActiva" class="admin_row_preguntaActiva">
+                        </div>
+                        <div class="question-actions">
+                            <button type="button" class="btn btn-secondary btn-small admin_removeRow" title="Eliminar fila" style="display:none;">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:.75rem;align-items:center;margin-top:.5rem;">
+                    <button type="button" id="admin_addQuestionBtn" class="btn btn-outline">+ Agregar pregunta</button>
+                    <small style="color:var(--color-gris-oscuro);">Puedes añadir varias preguntas a la vez.</small>
+                </div>
+
+                <div style="text-align:right;margin-top:1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="admin.closePreguntaModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Pantalla de Login -->
     <div id="loginScreen" class="main-container">
         <div class="content-wrapper login-container fade-in">
@@ -308,7 +460,17 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label for="pin" class="form-label required">PIN de Administrador</label>
-                        <input type="password" id="pin" name="pin" class="form-input" required autocomplete="one-time-code" placeholder="Ingrese PIN" />
+                        <div style="position:relative;display:flex;align-items:center;">
+                            <input type="password" id="pin" name="pin" class="form-input" required autocomplete="one-time-code" placeholder="Ingrese PIN" style="padding-right:40px;" />
+                            <button type="button" id="togglePin" aria-label="Mostrar PIN" style="position:absolute;right:8px;background:transparent;border:none;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;padding:0;" tabindex="-1">
+                                <span id="iconShowPin" style="display:block;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </span>
+                                <span id="iconHidePin" style="display:none;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.81 21.81 0 0 1 5.06-6.06M1 1l22 22"></path><path d="M9.53 9.53A3 3 0 0 0 12 15a3 3 0 0 0 2.47-5.47"></path></svg>
+                                </span>
+                            </button>
+                        </div>
                         <small style="color: var(--color-gris-oscuro); display:block; margin-top:.5rem;">Se usará un email administrativo fijo (configurable).</small>
                     </div>
 
@@ -338,10 +500,9 @@
             <!-- Header del Panel -->
             <div class="admin-header">
                 <div>
-                    <h1 class="page-title mb-0">📊 Panel Administrativo</h1>
-                    <p class="page-subtitle mb-0">Gestión de informes del Sumo Consejo</p>
+                    <h2 class="page-title" style="margin:0;">Panel Administrativo</h2>
                 </div>
-                <div>
+                <div style="display:flex;align-items:center;gap:1rem;">
                     <span id="adminUser" style="color: var(--color-gris-oscuro); margin-right: 1rem;"></span>
                     <button class="btn btn-secondary btn-small" onclick="admin.logout()">
                         🚪 Cerrar Sesión
@@ -369,137 +530,125 @@
                 </div>
             </div>
 
-            <!-- Tabs de Navegación -->
-            <div class="tab-container">
-                <button class="tab active" onclick="admin.switchTab('todos')">
-                    📋 Todos los Informes
-                </button>
-                <button class="tab" onclick="admin.switchTab('agrupados')">
-                    👥 Por Persona
-                </button>
-                <button class="tab" onclick="admin.switchTab('filtros')">
-                    🔍 Filtros Avanzados
-                </button>
-            </div>
+            <!-- Tabs de Navegación y Contenido -->
+            <div class="tabs-panel">
+                <div class="tab-container">
+                    <button class="tab active" onclick="admin.switchTab('todos')">
+                        📋 Informes Recibidos
+                    </button>
+                    <button class="tab" onclick="admin.switchTab('visualizados')">
+                        ✅ Informes Visualizados
+                    </button>
+                    <button class="tab" onclick="admin.switchTab('agrupados')">
+                        👥 Por Persona
+                    </button>
+                    <button class="tab" onclick="admin.switchTab('filtros')">
+                        🔍 Filtros Avanzados
+                    </button>
+                    <button class="tab" onclick="admin.switchTab('preguntas')">
+                        ❓ Preguntas
+                    </button>
+                </div>
 
-            <!-- Contenido de Tabs -->
-            
-            <!-- Tab: Todos los Informes -->
-            <div id="tabTodos" class="tab-content active">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="mb-0">📋 Listado Completo de Informes</h3>
-                        <div>
-                            <button class="btn btn-secondary btn-small" onclick="admin.refreshData()">
+                <!-- Contenido de Tabs -->
+                <div id="tabPreguntas" class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="mb-0">❓ Gestión de Preguntas Personalizadas</h3>
+                            <button class="btn btn-primary btn-small" onclick="admin.showAddPreguntaModal()">
+                                ➕ Nueva Pregunta
+                            </button>
+                        </div>
+                        <div id="preguntasContainer">
+                            <div class="loading-container">
+                                <div class="loading"></div>
+                                <p>Cargando preguntas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tabTodos" class="tab-content active">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="mb-0">📋 Listado Completo de Informes</h3>
+                            <div>
+                                <button class="btn btn-secondary btn-small" onclick="admin.refreshData()">
+                                    🔄 Actualizar
+                                </button>
+                                <button class="btn btn-primary btn-small" onclick="admin.exportData()">
+                                    📥 Exportar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="todosInformesContainer"></div>
+                    </div>
+                </div>
+                <div id="tabVisualizados" class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="mb-0">📋 Listado de Informes Visualizados</h3>
+                            <div>
+                                <button class="btn btn-secondary btn-small" onclick="admin.loadVisualizados()">
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="visualizadosContainer"></div>
+                    </div>
+                </div>
+                <div id="tabAgrupados" class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="mb-0">👥 Informes Agrupados por Persona</h3>
+                            <button class="btn btn-secondary btn-small" onclick="admin.loadAgrupadosData()">
                                 🔄 Actualizar
                             </button>
-                            <button class="btn btn-primary btn-small" onclick="admin.exportData()">
-                                📥 Exportar
-                            </button>
                         </div>
-                    </div>
-                    
-                    <div id="todosInformesContainer">
-                        <div class="loading-container">
-                            <div class="loading"></div>
-                            <p>Cargando informes...</p>
+                        <div id="agrupadosContainer">
+                            <div class="loading-container">
+                                <div class="loading"></div>
+                                <p>Cargando datos agrupados...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Tab: Por Persona -->
-            <div id="tabAgrupados" class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="mb-0">👥 Informes Agrupados por Persona</h3>
-                        <button class="btn btn-secondary btn-small" onclick="admin.loadAgrupadosData()">
-                            🔄 Actualizar
-                        </button>
-                    </div>
-                    
-                    <div id="agrupadosContainer">
-                        <div class="loading-container">
-                            <div class="loading"></div>
-                            <p>Cargando datos agrupados...</p>
+                <div id="tabFiltros" class="tab-content">
+                    <div class="filters-section">
+                        <h3 class="section-title">🔍 Filtros Avanzados</h3>
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label for="filtroFechaInicio" class="form-label">Fecha Inicio</label>
+                                <input type="date" id="filtroFechaInicio" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="filtroFechaFin" class="form-label">Fecha Fin</label>
+                                <input type="date" id="filtroFechaFin" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="filtroOrganizacion" class="form-label">Organización</label>
+                                <select id="filtroOrganizacion" class="form-select"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filtroUnidad" class="form-label">Unidad</label>
+                                <select id="filtroUnidad" class="form-select"></select>
+                            </div>
+                        </div>
+                        <div class="filters-actions">
+                            <button class="btn btn-primary" onclick="admin.applyFilters()">🔍 Aplicar Filtros</button>
+                            <button class="btn btn-secondary" onclick="admin.clearFilters()">🧹 Limpiar Filtros</button>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Tab: Filtros Avanzados -->
-            <div id="tabFiltros" class="tab-content">
-                <div class="filters-section">
-                    <h3 class="section-title">🔍 Filtros Avanzados</h3>
-                    
-                    <div class="filters-grid">
-                        <div class="form-group">
-                            <label for="filtroFechaInicio" class="form-label">Fecha Inicio</label>
-                            <input type="date" id="filtroFechaInicio" class="form-input">
+                    <div class="filtered-results">
+                        <h3 class="section-title">📑 Resultados Filtrados</h3>
+                        <div id="filteredContainer">
+                            <div class="no-data">
+                                <p>Configure los filtros y haga clic en "Aplicar Filtros" para ver los resultados</p>
+                            </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="filtroFechaFin" class="form-label">Fecha Fin</label>
-                            <input type="date" id="filtroFechaFin" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="filtroOrganizacion" class="form-label">Organización</label>
-                            <select id="filtroOrganizacion" class="form-select">
-                                <option value="">Todas las organizaciones</option>
-                                <option value="Barrio y Quórum">Barrio y Quórum</option>
-                                <option value="Hombres Jóvenes">Hombres Jóvenes</option>
-                                <option value="Mujeres Jóvenes">Mujeres Jóvenes</option>
-                                <option value="Primaria">Primaria</option>
-                                <option value="JAS">JAS</option>
-                                <option value="Obra Misional">Obra Misional</option>
-                                <option value="Autosuficiencia">Autosuficiencia</option>
-                                <option value="Sociedad de Socorro">Sociedad de Socorro</option>
-                                <option value="Historia Familiar y Templo">Historia Familiar y Templo</option>
-                                <option value="Escuela Dominical">Escuela Dominical</option>
-                                <option value="Seminario">Seminario</option>
-                                <option value="Instituto">Instituto</option>
-                                <option value="AS">AS</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="filtroUnidad" class="form-label">Unidad</label>
-                            <select id="filtroUnidad" class="form-select">
-                                <option value="">Todas las unidades</option>
-                                <option value="Aldo Bonzi">Aldo Bonzi</option>
-                                <option value="Ciudad Evita 1">Ciudad Evita 1</option>
-                                <option value="Ciudad Evita 2">Ciudad Evita 2</option>
-                                <option value="Cristianía">Cristianía</option>
-                                <option value="Villa Celina">Villa Celina</option>
-                                <option value="Villa Madero">Villa Madero</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-primary" onclick="admin.applyFilters()">
-                            🔍 Aplicar Filtros
-                        </button>
-                        <button class="btn btn-secondary" onclick="admin.clearFilters()">
-                            🧹 Limpiar Filtros
-                        </button>
+                        <span id="filteredCount" class="badge badge-info" style="float:right; margin-top:8px;">0 resultados</span>
                     </div>
                 </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="mb-0">📊 Resultados Filtrados</h3>
-                        <span id="filteredCount" class="badge badge-info">0 resultados</span>
-                    </div>
-                    
-                    <div id="filteredContainer">
-                        <div class="no-data">
-                            <p>Configure los filtros y haga clic en "Aplicar Filtros" para ver los resultados</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
         </div>
     </div>
@@ -524,5 +673,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/admin.js"></script>
+        <!-- Toast container -->
+        <div id="toastContainer" aria-live="polite" aria-atomic="true" style="position:fixed;top:16px;right:16px;z-index:2000;"></div>
 </body>
 </html>

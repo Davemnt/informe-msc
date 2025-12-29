@@ -1,0 +1,25 @@
+{
+  "preguntas": [
+    {
+      "id": "ejemplo1",
+      "texto": "¿Cuántas personas asistieron a la reunión?",
+      "tipo": "numero",
+      "orden": 1,
+      "activa": true
+    },
+    {
+      "id": "ejemplo2",
+      "texto": "¿Cuál es la fecha del evento?",
+      "tipo": "fecha",
+      "orden": 2,
+      "activa": true
+    },
+    {
+      "id": "ejemplo3",
+      "texto": "Observaciones generales",
+      "tipo": "texto",
+      "orden": 3,
+      "activa": true
+    }
+  ]
+}

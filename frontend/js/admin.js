@@ -1,8 +1,113 @@
+// Permitir que los botones llamen a verInforme desde HTML
+window.verInforme = function(id) {
+    if (window.admin && typeof window.admin.viewInforme === 'function') {
+        window.admin.viewInforme(id);
+    }
+};
+// Toast helper
+window.showToast = function(message, type = 'info', duration = 3500) {
+    try {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = `toast ${type}`;
+        div.innerHTML = `<span>${message}</span><button class="close-toast" aria-label="Cerrar">&times;</button>`;
+        container.appendChild(div);
+        // show
+        requestAnimationFrame(() => div.classList.add('show'));
+        const closeFn = () => {
+            div.classList.remove('show');
+            setTimeout(() => div.remove(), 300);
+        };
+        div.querySelector('.close-toast').addEventListener('click', closeFn);
+        if (duration > 0) setTimeout(closeFn, duration);
+    } catch (e) { console.error('showToast error', e); }
+};
+// ...existing code...
 // ===============================================
 // PANEL ADMINISTRATIVO - GESTIÓN COMPLETA DE INFORMES
 // ===============================================
 
 class AdminPanel {
+            showEditarPreguntaModal(id, texto, tipo, orden, activa) {
+                document.getElementById('admin_modalEditarPregunta').style.display = 'block';
+                document.getElementById('admin_editarPreguntaId').value = id;
+                document.getElementById('admin_editarPreguntaTexto').value = decodeURIComponent(texto);
+                document.getElementById('admin_editarPreguntaTipo').value = tipo;
+                document.getElementById('admin_editarPreguntaOrden').value = orden;
+                const chk = document.getElementById('admin_editarPreguntaActiva');
+                if (chk) chk.checked = (activa === true || activa === 'true' || activa === 1 || activa === '1');
+            }
+
+            closeEditarPreguntaModal() {
+                document.getElementById('admin_modalEditarPregunta').style.display = 'none';
+            }
+
+            async editarPregunta(e) {
+                e.preventDefault();
+                const id = document.getElementById('admin_editarPreguntaId').value;
+                const texto = document.getElementById('admin_editarPreguntaTexto').value.trim();
+                const tipo = document.getElementById('admin_editarPreguntaTipo').value;
+                const orden = parseInt(document.getElementById('admin_editarPreguntaOrden').value, 10) || 0;
+                if (!texto) {
+                    alert('El texto de la pregunta es obligatorio');
+                    return;
+                }
+                try {
+                    const activa = document.getElementById('admin_editarPreguntaActiva') ? document.getElementById('admin_editarPreguntaActiva').checked : true;
+                    if (window.firebaseApp && window.firebaseApp.db) {
+                        await window.firebaseApp.db.collection('preguntas').doc(id).update({
+                            texto,
+                            tipo,
+                            orden,
+                            activa: !!activa
+                        });
+                        this.closeEditarPreguntaModal();
+                            this.loadPreguntas();
+                            window.showToast('Pregunta actualizada', 'success');
+                        return;
+                    }
+                    // Fallback to API if Firebase not available
+                    const token = localStorage.getItem('adminToken');
+                    const res = await fetch(`/api/admin/preguntas/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ texto, tipo, orden, activa: 1 })
+                    });
+                    if (res.ok) {
+                        this.closeEditarPreguntaModal();
+                        this.loadPreguntas();
+                        window.showToast('Pregunta actualizada', 'success');
+                    } else {
+                        window.showToast('No se pudo editar la pregunta', 'error');
+                    }
+                } catch (e) {
+                    console.error('editarPregunta error:', e);
+                    window.showToast('Error al editar pregunta', 'error');
+                }
+            }
+        // Obtener IDs de informes visualizados desde localStorage
+        getVisualizados() {
+            const v = localStorage.getItem('informesVisualizados');
+            return v ? JSON.parse(v) : [];
+        }
+
+        // Guardar IDs de informes visualizados en localStorage
+        setVisualizados(ids) {
+            localStorage.setItem('informesVisualizados', JSON.stringify(ids));
+        }
+
+        // Marcar un informe como visualizado
+        marcarVisualizado(id) {
+            const visualizados = this.getVisualizados();
+            if (!visualizados.includes(id)) {
+                visualizados.push(id);
+                this.setVisualizados(visualizados);
+            }
+        }
     constructor() {
         this.token = localStorage.getItem('adminToken');
         this.currentUser = localStorage.getItem('adminUser');
@@ -33,6 +138,26 @@ class AdminPanel {
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+        // Mostrar/ocultar PIN
+        const pinInput = document.getElementById('pin');
+        const togglePin = document.getElementById('togglePin');
+        const iconShow = document.getElementById('iconShowPin');
+        const iconHide = document.getElementById('iconHidePin');
+        if (pinInput && togglePin && iconShow && iconHide) {
+            togglePin.addEventListener('click', function() {
+                if (pinInput.type === 'password') {
+                    pinInput.type = 'text';
+                    iconShow.style.display = 'none';
+                    iconHide.style.display = 'block';
+                    togglePin.setAttribute('aria-label', 'Ocultar PIN');
+                } else {
+                    pinInput.type = 'password';
+                    iconShow.style.display = 'block';
+                    iconHide.style.display = 'none';
+                    togglePin.setAttribute('aria-label', 'Mostrar PIN');
+                }
+            });
         }
 
         // Cerrar modal al hacer clic fuera de él
@@ -173,11 +298,13 @@ class AdminPanel {
 
     // 📊 Carga de datos y estadísticas
     async loadInitialData() {
+        console.log('AdminPanel.loadInitialData: start', { token: this.token, firebaseApp: !!window.firebaseApp });
         try {
             await Promise.all([
                 this.loadStats(),
                 this.loadTodosInformes()
             ]);
+            console.log('AdminPanel.loadInitialData: completed');
         } catch (error) {
             console.error('Error cargando datos iniciales:', error);
             this.showMessage('Error cargando datos del panel', 'error');
@@ -208,8 +335,8 @@ class AdminPanel {
 
         const totalInformes = informes.length;
         const totalPersonas = new Set(informes.map(i => `${i.nombre} ${i.apellido}`)).size;
-        const informesHoy = informes.filter(i => i.fecha_informe.startsWith(today)).length;
-        const informesMes = informes.filter(i => i.fecha_informe.startsWith(currentMonth)).length;
+        const informesHoy = informes.filter(i => typeof i.fecha_informe === 'string' && i.fecha_informe.startsWith(today)).length;
+        const informesMes = informes.filter(i => typeof i.fecha_informe === 'string' && i.fecha_informe.startsWith(currentMonth)).length;
 
         document.getElementById('totalInformes').textContent = totalInformes;
         document.getElementById('totalPersonas').textContent = totalPersonas;
@@ -237,8 +364,14 @@ class AdminPanel {
             case 'todos':
                 this.loadTodosInformes();
                 break;
+            case 'visualizados':
+                this.loadVisualizados();
+                break;
             case 'agrupados':
                 this.loadAgrupadosData();
+                break;
+            case 'preguntas':
+                this.loadPreguntas();
                 break;
             case 'filtros':
                 // Los filtros no necesitan carga automática
@@ -246,10 +379,275 @@ class AdminPanel {
         }
     }
 
+    // ❓ Tab: Preguntas Personalizadas
+    async loadPreguntas() {
+            const container = document.getElementById('preguntasContainer');
+        container.innerHTML = '<div class="loading-container"><div class="loading"></div><p>Cargando preguntas...</p></div>';
+        console.log('AdminPanel.loadPreguntas: start', { firebaseAvailable: !!window.firebaseApp });
+        try {
+            let preguntas = null;
+            // Try Firestore first, but fail gracefully to static fallback
+            if (window.firebaseApp && window.firebaseApp.db) {
+                try {
+                    const snapshot = await window.firebaseApp.db.collection('preguntas').orderBy('orden').get();
+                    preguntas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (fbErr) {
+                    console.error('AdminPanel.loadPreguntas: Firestore read error, falling back to static JSON', fbErr);
+                    preguntas = null;
+                }
+            }
+            if (!preguntas) {
+                // Fallback estático
+                try {
+                    const fallback = await fetch('/data/preguntas.json');
+                    if (!fallback.ok) {
+                        container.innerHTML = '<div class="no-data">No hay preguntas personalizadas.</div>';
+                        return;
+                    }
+                    const data = await fallback.json();
+                    preguntas = data.preguntas || [];
+                } catch (fetchErr) {
+                    console.error('AdminPanel.loadPreguntas: static fallback fetch error', fetchErr);
+                    container.innerHTML = '<div class="no-data">Error al cargar preguntas.</div>';
+                    return;
+                }
+            }
+            if (!preguntas || preguntas.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay preguntas personalizadas.</div>';
+                return;
+            }
+            // Filtrar preguntas que no tienen texto (no deben mostrarse)
+            preguntas = preguntas.filter(p => p.texto && p.texto.toString().trim().length > 0);
+            if (!preguntas || preguntas.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay preguntas personalizadas.</div>';
+                return;
+            }
+            let html = '<table class="data-table"><thead><tr><th>Pregunta</th><th>Tipo</th><th>Orden</th><th>Activa</th><th>Acciones</th></tr></thead><tbody>';
+            for (const pregunta of preguntas) {
+                html += `<tr>
+                    <td>${pregunta.texto}</td>
+                    <td>${pregunta.tipo}</td>
+                    <td>${pregunta.orden}</td>
+                    <td>${pregunta.activa ? 'Sí' : 'No'}</td>
+                    <td>
+                        <button class="btn btn-primary btn-small" onclick="admin.showEditarPreguntaModal('${pregunta.id}', '${encodeURIComponent(pregunta.texto)}', '${pregunta.tipo}', ${pregunta.orden}, ${pregunta.activa ? 'true' : 'false'})">✏️ Editar</button>
+                        <button class="btn btn-secondary btn-small" onclick="admin.deletePregunta('${pregunta.id}')">🗑️ Eliminar</button>
+                    </td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+                // Modal pregunta: submit
+                const formPregunta = document.getElementById('admin_formPregunta');
+                if (formPregunta) {
+                    formPregunta.addEventListener('submit', (e) => this.createPregunta(e));
+                }
+
+                // Modal editar pregunta: submit
+                const formEditarPregunta = document.getElementById('admin_formEditarPregunta');
+                if (formEditarPregunta) {
+                    formEditarPregunta.addEventListener('submit', (e) => this.editarPregunta(e));
+                }
+
+                // Cerrar modales al hacer click fuera
+                window.addEventListener('click', (e) => {
+                    const modal = document.getElementById('admin_modalPregunta');
+                    if (e.target === modal) {
+                        this.closePreguntaModal();
+                    }
+                    const modalEdit = document.getElementById('admin_modalEditarPregunta');
+                    if (e.target === modalEdit) {
+                        this.closeEditarPreguntaModal();
+                    }
+                });
+        } catch (e) {
+            console.error('AdminPanel.loadPreguntas: unexpected error', e);
+            container.innerHTML = '<div class="no-data">Error al cargar preguntas.</div>';
+        }
+    }
+
+    async deletePregunta(id) {
+        if (!confirm('¿Seguro que deseas eliminar esta pregunta?')) return;
+        const token = localStorage.getItem('adminToken');
+        try {
+            if (window.firebaseApp && window.firebaseApp.db) {
+                await window.firebaseApp.db.collection('preguntas').doc(id).delete();
+                this.loadPreguntas();
+                window.showToast('Pregunta eliminada', 'success');
+                return;
+            }
+            const res = await fetch(`/api/admin/preguntas/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                this.loadPreguntas();
+                window.showToast('Pregunta eliminada', 'success');
+            } else {
+                window.showToast('No se pudo eliminar la pregunta', 'error');
+            }
+        } catch (e) {
+            window.showToast('Error de red al eliminar pregunta', 'error');
+        }
+    }
+
+    showAddPreguntaModal() {
+        const modal = document.getElementById('admin_modalPregunta');
+        if (modal) modal.style.display = 'block';
+        // Ensure at least one empty row exists and bind events
+        setTimeout(() => {
+            if (typeof this.ensureQuestionRow === 'function') this.ensureQuestionRow();
+        }, 50);
+    }
+
+    closePreguntaModal() {
+        const modal = document.getElementById('admin_modalPregunta');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async createPregunta(e) {
+        e.preventDefault();
+        // Collect all rows
+        const container = document.getElementById('admin_newQuestionsContainer');
+        const rows = Array.from(container.querySelectorAll('.question-row'));
+        const toCreate = [];
+        for (const r of rows) {
+            const textoEl = r.querySelector('.admin_row_preguntaTexto');
+            if (!textoEl) continue;
+            const textoVal = textoEl.value.trim();
+            if (!textoVal) continue; // skip empty rows
+            const tipoVal = r.querySelector('.admin_row_preguntaTipo').value;
+            const ordenVal = parseInt(r.querySelector('.admin_row_preguntaOrden').value, 10) || 0;
+            const activaVal = !!r.querySelector('.admin_row_preguntaActiva').checked;
+            toCreate.push({ texto: textoVal, tipo: tipoVal, orden: ordenVal, activa: activaVal });
+        }
+
+        if (toCreate.length === 0) {
+            alert('Agrega al menos una pregunta con texto.');
+            return;
+        }
+
+        try {
+            if (window.firebaseApp && window.firebaseApp.db) {
+                console.log('AdminPanel.createPregunta: saving to Firestore', toCreate);
+                // add sequentially (could be batched)
+                const auth = window.firebaseApp.auth;
+                const user = auth && auth.currentUser ? auth.currentUser : null;
+                if (!user) {
+                    window.showToast('Debes iniciar sesión antes de crear preguntas', 'error');
+                    return;
+                }
+                const uid = user.uid;
+                for (const p of toCreate) {
+                    try {
+                        await window.firebaseApp.db.collection('preguntas').add(Object.assign({}, p, {
+                            createdBy: uid,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }));
+                    } catch (fbAddErr) {
+                        console.error('AdminPanel.createPregunta: Firestore add error for', p, fbAddErr);
+                        window.showToast('Error guardando pregunta en Firestore', 'error');
+                        return;
+                    }
+                }
+                this.closePreguntaModal();
+                // small delay to allow Firestore indexes to update in some environments
+                setTimeout(() => this.loadPreguntas(), 400);
+                window.showToast(`${toCreate.length} pregunta(s) creada(s)`, 'success');
+                return;
+            }
+
+            // Fallback to backend API: send multiple sequentially
+            const token = localStorage.getItem('adminToken');
+            let success = 0;
+            for (const p of toCreate) {
+                try {
+                    const res = await fetch('/api/admin/preguntas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ texto: p.texto, tipo: p.tipo, orden: p.orden, activa: p.activa ? 1 : 0 })
+                    });
+                    if (res.ok) success++;
+                    else {
+                        const txt = await res.text();
+                        console.error('AdminPanel.createPregunta: API error response', res.status, txt);
+                    }
+                } catch (apiErr) {
+                    console.error('AdminPanel.createPregunta: network/API error for', p, apiErr);
+                }
+            }
+            if (success > 0) {
+                this.closePreguntaModal();
+                this.loadPreguntas();
+                window.showToast(`${success} pregunta(s) creada(s)`, 'success');
+            } else {
+                window.showToast('No se pudieron crear las preguntas', 'error');
+            }
+        } catch (e) {
+            console.error('createPregunta error:', e);
+            window.showToast('Error al crear pregunta(s)', 'error');
+        }
+    }
+
+    // Add a new empty question row to the modal
+    addPreguntaRow() {
+        const container = document.getElementById('admin_newQuestionsContainer');
+        if (!container) return;
+        const template = container.querySelector('.question-row');
+        const newRow = template.cloneNode(true);
+        // clear inputs
+        newRow.querySelector('.admin_row_preguntaTexto').value = '';
+        newRow.querySelector('.admin_row_preguntaTipo').value = 'texto';
+        newRow.querySelector('.admin_row_preguntaOrden').value = '0';
+        // default: desactivada hasta que el admin la marque explícitamente
+        const actCheckbox = newRow.querySelector('.admin_row_preguntaActiva');
+        if (actCheckbox) actCheckbox.checked = false;
+        // show remove button
+        const removeBtn = newRow.querySelector('.admin_removeRow');
+        if (removeBtn) {
+            removeBtn.style.display = 'inline-block';
+            removeBtn.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                newRow.remove();
+            });
+        }
+        // Do NOT auto-add rows on input; rows are added only via the '+ Agregar pregunta' button
+        container.appendChild(newRow);
+    }
+
+    // Ensure at least one empty row and bind the 'Agregar' button
+    ensureQuestionRow() {
+        const container = document.getElementById('admin_newQuestionsContainer');
+        if (!container) return;
+        const addBtn = document.getElementById('admin_addQuestionBtn');
+        if (addBtn && !addBtn._bound) {
+            addBtn.addEventListener('click', () => this.addPreguntaRow());
+            addBtn._bound = true;
+        }
+        // bind existing row's input
+        const rows = Array.from(container.querySelectorAll('.question-row'));
+        if (rows.length === 0) this.addPreguntaRow();
+        rows.forEach((r, idx) => {
+            const removeBtn = r.querySelector('.admin_removeRow');
+            if (removeBtn && !removeBtn._bound) {
+                removeBtn.addEventListener('click', (ev) => { ev.preventDefault(); r.remove(); });
+                removeBtn._bound = true;
+            }
+        });
+    }
+
+    // When typing in the last row, add another empty row
+    // onRowInput is intentionally a no-op because rows are added only via the button
+    onRowInput() {
+        return;
+    }
+
     // 📋 Tab: Todos los Informes
     async loadTodosInformes() {
         const container = document.getElementById('todosInformesContainer');
-        
         try {
             container.innerHTML = `
                 <div class="loading-container">
@@ -257,16 +655,15 @@ class AdminPanel {
                     <p>Cargando informes...</p>
                 </div>
             `;
-
-            const response = await this.fetchWithAuth('/api/admin/informes');
-            
-            if (response.ok) {
-                const data = await response.json();
-                this.renderTodosInformes(data.informes, container);
+            if (window.firebaseApp && typeof window.firebaseApp.fetchAllInformes === 'function') {
+                const all = await window.firebaseApp.fetchAllInformes();
+                // Filtrar solo los NO visualizados
+                const visualizados = this.getVisualizados();
+                const noVisualizados = all.filter(i => !visualizados.includes(i.id));
+                this.renderTodosInformes(noVisualizados, container);
             } else {
-                throw new Error('Error cargando informes');
+                throw new Error('Firestore no disponible');
             }
-
         } catch (error) {
             console.error('Error cargando todos los informes:', error);
             container.innerHTML = `
@@ -280,21 +677,43 @@ class AdminPanel {
         }
     }
 
-    renderTodosInformes(informes, container) {
-        if (informes.length === 0) {
+    // Cargar informes visualizados
+    async loadVisualizados() {
+        const container = document.getElementById('visualizadosContainer');
+        try {
             container.innerHTML = `
-                <div class="no-data">
-                    <p>📭 No hay informes registrados</p>
+                <div class="loading-container">
+                    <div class="loading"></div>
+                    <p>Cargando informes visualizados...</p>
                 </div>
             `;
-            return;
+            const response = await this.fetchWithAuth('/api/admin/informes');
+            if (response.ok) {
+                const data = await response.json();
+                const visualizados = this.getVisualizados();
+                const informesVisualizados = data.informes.filter(i => visualizados.includes(i.id));
+                this.renderTodosInformes(informesVisualizados, container);
+            } else {
+                throw new Error('Error cargando informes visualizados');
+            }
+        } catch (error) {
+            console.error('Error cargando informes visualizados:', error);
+            container.innerHTML = `
+                <div class="no-data">
+                    <p>❌ Error cargando los informes visualizados</p>
+                    <button class="btn btn-secondary btn-small" onclick="admin.loadVisualizados()">
+                        🔄 Reintentar
+                    </button>
+                </div>
+            `;
         }
+    }
 
+    renderTodosInformes(informes, container) {
         const tableHTML = `
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Nombre Completo</th>
                         <th>Fecha</th>
                         <th>Organizaciones</th>
@@ -304,18 +723,27 @@ class AdminPanel {
                     </tr>
                 </thead>
                 <tbody>
-                    ${informes.map(informe => this.renderInformeRow(informe)).join('')}
+                    ${informes.length > 0 ? informes.map(informe => this.renderInformeRow(informe)).join('') : `<tr><td colspan="6" style="text-align:center;">📭 No hay informes registrados</td></tr>`}
                 </tbody>
             </table>
         `;
-
         container.innerHTML = tableHTML;
     }
 
     renderInformeRow(informe) {
-        const fecha = new Date(informe.fecha_informe).toLocaleDateString('es-ES');
-        const organizaciones = informe.organizaciones.length > 0 ? informe.organizaciones.join(', ') : 'Ninguna';
-        const unidades = informe.unidades.length > 0 ? informe.unidades.join(', ') : 'Ninguna';
+        let fecha = 'Sin fecha';
+        if (informe.fecha_informe) {
+            if (typeof informe.fecha_informe === 'string') {
+                const d = new Date(informe.fecha_informe);
+                if (!isNaN(d)) fecha = d.toLocaleDateString('es-ES');
+            } else if (informe.fecha_informe.toDate) {
+                // Firestore Timestamp
+                const d = informe.fecha_informe.toDate();
+                if (!isNaN(d)) fecha = d.toLocaleDateString('es-ES');
+            }
+        }
+        const organizaciones = informe.organizaciones && informe.organizaciones.length > 0 ? informe.organizaciones.join(', ') : 'Ninguna';
+        const unidades = informe.unidades && informe.unidades.length > 0 ? informe.unidades.join(', ') : 'Ninguna';
         
         let estadoBadge = '';
         if (informe.tiene_unidades) {
@@ -328,7 +756,6 @@ class AdminPanel {
 
         return `
             <tr>
-                <td>${informe.id}</td>
                 <td><strong>${informe.nombre} ${informe.apellido}</strong></td>
                 <td>${fecha}</td>
                 <td title="${organizaciones}">${this.truncateText(organizaciones, 30)}</td>
@@ -336,7 +763,7 @@ class AdminPanel {
                 <td>${estadoBadge}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-primary btn-small" onclick="admin.viewInforme(${informe.id})">
+                        <button class="btn btn-primary btn-small" onclick="verInforme('${informe.id}')">
                             👁️ Ver
                         </button>
                     </div>
@@ -388,15 +815,13 @@ class AdminPanel {
             `;
             return;
         }
-
         const tableHTML = `
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>Persona</th>
                         <th>Total Informes</th>
-                        <th>Primer Informe</th>
-                        <th>Último Informe</th>
+                        <th>Último Informe Recibido</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -405,34 +830,41 @@ class AdminPanel {
                 </tbody>
             </table>
         `;
-
         container.innerHTML = tableHTML;
     }
 
     renderPersonaRow(persona) {
-        const primerInforme = new Date(persona.primer_informe).toLocaleDateString('es-ES');
-        const ultimoInforme = new Date(persona.ultimo_informe).toLocaleDateString('es-ES');
-        const diasDesdeUltimo = Math.floor((new Date() - new Date(persona.ultimo_informe)) / (1000 * 60 * 60 * 24));
-
-        let estadoTiempo = '';
-        if (diasDesdeUltimo <= 15) {
-            estadoTiempo = '<span class="badge badge-success">Reciente</span>';
-        } else if (diasDesdeUltimo <= 30) {
-            estadoTiempo = '<span class="badge badge-warning">Hace tiempo</span>';
-        } else {
-            estadoTiempo = '<span class="badge badge-info">Inactivo</span>';
+        function formatFecha(fecha) {
+            if (!fecha) return 'Sin fecha';
+            const d = new Date(fecha);
+            return isNaN(d) ? 'Sin fecha' : d.toLocaleDateString('es-ES');
         }
-
+        // Solo mostrar la fecha del último informe recibido
+        const ultimoInforme = formatFecha(persona.ultimo_informe);
+        let diasDesdeUltimo = null;
+        if (ultimoInforme !== 'Sin fecha') {
+            diasDesdeUltimo = Math.floor((new Date() - new Date(persona.ultimo_informe)) / (1000 * 60 * 60 * 24));
+        }
+        let estadoTiempo = '';
+        if (diasDesdeUltimo !== null) {
+            if (diasDesdeUltimo <= 15) {
+                estadoTiempo = '<span class="badge badge-success">Reciente</span>';
+            } else if (diasDesdeUltimo <= 30) {
+                estadoTiempo = '<span class="badge badge-warning">Hace tiempo</span>';
+            } else {
+                estadoTiempo = '<span class="badge badge-info">Inactivo</span>';
+            }
+        }
+        // Botón para ver todas las fechas de informes enviados
         return `
             <tr>
                 <td><strong>${persona.persona}</strong></td>
                 <td>
                     <span class="badge badge-info">${persona.total_informes}</span>
                 </td>
-                <td>${primerInforme}</td>
                 <td>
-                    ${ultimoInforme}
-                    ${estadoTiempo}
+                    ${ultimoInforme} ${estadoTiempo}
+                    <button class="btn btn-secondary btn-small" style="margin-left:8px;" onclick="admin.showFechasInformes('${persona.ids_informes}','${persona.persona.replace(/'/g, '\'')}')">🗓️</button>
                 </td>
                 <td>
                     <button class="btn btn-primary btn-small" onclick="admin.viewPersonInformes('${persona.ids_informes}')">
@@ -441,6 +873,88 @@ class AdminPanel {
                 </td>
             </tr>
         `;
+    }
+    // Mostrar modal con todas las fechas de informes enviados por la persona
+    showFechasInformes(idsString, personaNombre) {
+        const ids = idsString.split(',').map(id => id.trim());
+        const informesPersona = this.allInformes.filter(informe => ids.includes(String(informe.id)));
+        if (informesPersona.length === 0) {
+            alert('No hay informes registrados para esta persona.');
+            return;
+        }
+        // Ordenar por fecha descendente
+        informesPersona.sort((a, b) => new Date(b.fecha_informe) - new Date(a.fecha_informe));
+        const listaFechas = informesPersona.map((i) => {
+            const d = new Date(i.fecha_informe);
+            return `<li style=\"padding:0.5rem 0;border-bottom:1px solid #eee;display:block;\"><span style=\"font-weight:500;\">${!isNaN(d) ? d.toLocaleString('es-ES') : 'Sin fecha'}</span></li>`;
+        }).join('');
+        const modal = document.getElementById('informeModal');
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `
+            <div class=\"fechas-modal-content\">
+                <h2 class=\"fechas-modal-title\">🗓️ Fechas de informes enviados</h2>
+                <div class=\"fechas-modal-persona\">${personaNombre}</div>
+                <ul class=\"fechas-modal-list\">${listaFechas}</ul>
+                <div class=\"fechas-modal-footer\">
+                    <button class=\"btn btn-secondary\" onclick=\"admin.closeModal()\">Cerrar</button>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'block';
+        // Agregar estilos responsivos y modernos
+        if (!document.getElementById('fechas-modal-style')) {
+            const style = document.createElement('style');
+            style.id = 'fechas-modal-style';
+            style.textContent = `
+                .fechas-modal-content {
+                    max-width: 420px;
+                    margin: 2rem auto;
+                    background: #fff;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+                    padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.2rem;
+                    animation: fadeIn 0.3s;
+                }
+                .fechas-modal-title {
+                    font-size: 1.3rem;
+                    font-weight: 600;
+                    margin-bottom: 0.2rem;
+                    text-align: center;
+                }
+                .fechas-modal-persona {
+                    color: #666;
+                    font-size: 1.05rem;
+                    text-align: center;
+                    margin-bottom: 0.5rem;
+                }
+                .fechas-modal-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    max-height: 260px;
+                    overflow-y: auto;
+                }
+                .fechas-modal-list li:last-child {
+                    border-bottom: none;
+                }
+                .fechas-modal-footer {
+                    text-align: right;
+                }
+                @media (max-width: 600px) {
+                    .fechas-modal-content {
+                        max-width: 98vw;
+                        padding: 1rem 0.5rem 0.7rem 0.5rem;
+                    }
+                    .fechas-modal-title {
+                        font-size: 1.05rem;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 
     // 🔍 Tab: Filtros Avanzados
@@ -516,15 +1030,14 @@ class AdminPanel {
     async viewInforme(id) {
         try {
             const informe = this.allInformes.find(i => i.id === id);
-            
             if (!informe) {
-                // Si no está en el cache, cargar de nuevo
                 const response = await this.fetchWithAuth('/api/admin/informes');
                 if (response.ok) {
                     const data = await response.json();
                     this.allInformes = data.informes;
                     const informeFound = this.allInformes.find(i => i.id === id);
                     if (informeFound) {
+                        this.marcarVisualizado(informeFound.id);
                         this.showInformeModal(informeFound);
                     } else {
                         throw new Error('Informe no encontrado');
@@ -533,9 +1046,9 @@ class AdminPanel {
                     throw new Error('Error cargando informe');
                 }
             } else {
+                this.marcarVisualizado(informe.id);
                 this.showInformeModal(informe);
             }
-
         } catch (error) {
             console.error('Error mostrando informe:', error);
             alert('Error cargando el detalle del informe');
@@ -546,11 +1059,20 @@ class AdminPanel {
         const modal = document.getElementById('informeModal');
         const modalBody = document.getElementById('modalBody');
 
-        const fecha = new Date(informe.fecha_informe).toLocaleString('es-ES');
+        let fecha = 'Sin fecha';
+        if (informe.fecha_informe) {
+            if (typeof informe.fecha_informe === 'string') {
+                const d = new Date(informe.fecha_informe);
+                if (!isNaN(d)) fecha = d.toLocaleString('es-ES');
+            } else if (informe.fecha_informe.toDate) {
+                // Firestore Timestamp
+                const d = informe.fecha_informe.toDate();
+                if (!isNaN(d)) fecha = d.toLocaleString('es-ES');
+            }
+        }
         
         modalBody.innerHTML = `
             <div style="display: grid; gap: 1.5rem;">
-                
                 <!-- Datos Personales -->
                 <div class="card">
                     <div class="card-header">
@@ -595,16 +1117,13 @@ class AdminPanel {
                         <div class="card-header">
                             <h3 class="card-title">📊 Información de Unidad</h3>
                         </div>
-                        
                         <p><strong>Trabajan con futuros élderes:</strong> ${informe.trabajo_futuros_elderes ? 'Sí' : 'No'}</p>
-                        
                         ${informe.futuros_elderes.length > 0 ? `
                             <p><strong>Futuros élderes:</strong></p>
                             <ul style="margin-left: 1.5rem;">
                                 ${informe.futuros_elderes.map(elder => `<li>${elder}</li>`).join('')}
                             </ul>
                         ` : ''}
-
                         <p><strong>Reunión de presidencia:</strong> ${informe.reunion_presidencia ? 'Sí' : 'No'}</p>
                         <p><strong>Entrevistas de ministración:</strong> ${informe.entrevistas_ministracion ? 'Sí' : 'No'}</p>
                     </div>
@@ -616,16 +1135,49 @@ class AdminPanel {
                         <div class="card-header">
                             <h3 class="card-title">📋 Informe Detallado</h3>
                         </div>
-                        <div style="background: var(--color-gris-claro); padding: 1rem; border-radius: var(--border-radius); white-space: pre-wrap;">
-                            ${informe.informe_detallado}
+                        <div style="background: var(--color-gris-claro); padding: 1rem; border-radius: var(--border-radius); white-space: pre-wrap; text-align: left;">
+                            <div style="text-align:left;width:100%;display:block;">${informe.informe_detallado}</div>
                         </div>
                     </div>
                 ` : ''}
 
+                <!-- Botón Eliminar -->
+                <div style="text-align: right;">
+                    <button class="btn btn-danger" id="deleteInformeBtn">🗑️ Eliminar Informe</button>
+                </div>
             </div>
         `;
 
+        // Agregar handler para eliminar
+        setTimeout(() => {
+            const btn = document.getElementById('deleteInformeBtn');
+            if (btn) {
+                btn.onclick = async () => {
+                    if (confirm('¿Está seguro de que desea eliminar este informe? Esta acción no se puede deshacer.')) {
+                        try {
+                            await this.deleteInforme(informe.id);
+                            this.showMessage('Informe eliminado correctamente', 'success');
+                            this.closeModal();
+                            await this.refreshData();
+                        } catch (err) {
+                            this.showMessage('Error eliminando informe: ' + (err.message || err), 'error');
+                        }
+                    }
+                };
+            }
+        }, 0);
+
         modal.style.display = 'block';
+    }
+
+    // Eliminar informe de Firestore
+    async deleteInforme(id) {
+        if (window.firebaseApp && typeof window.firebaseApp.deleteInforme === 'function') {
+            await window.firebaseApp.deleteInforme(id);
+            await this.loadTodosInformes();
+        } else {
+            alert('No se puede eliminar informe: Firestore no disponible.');
+        }
     }
 
     viewPersonInformes(idsString) {

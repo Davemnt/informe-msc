@@ -3,6 +3,70 @@
 // ===============================================
 
 class FormularioDinamico {
+        async cargarPreguntasPersonalizadas() {
+            const section = document.getElementById('preguntasPersonalizadasSection');
+            const container = document.getElementById('preguntasPersonalizadasContainer');
+            try {
+                    let preguntas = null;
+                    if (window.firebaseApp && window.firebaseApp.db) {
+                        try {
+                            const snapshot = await window.firebaseApp.db.collection('preguntas').orderBy('orden').get();
+                            preguntas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        } catch (err) {
+                            preguntas = null;
+                        }
+                    }
+                    if (!preguntas) {
+                        try {
+                            const res = await fetch('/data/preguntas.json');
+                            if (!res.ok) {
+                                section.style.display = 'none';
+                                return;
+                            }
+                            const data = await res.json();
+                            preguntas = data.preguntas || [];
+                        } catch (err) {
+                            section.style.display = 'none';
+                            return;
+                        }
+                    }
+                    if (!preguntas || preguntas.length === 0) {
+                        section.style.display = 'none';
+                        return;
+                    }
+                    // Mostrar solo preguntas activas
+                    preguntas = preguntas.filter(p => p.activa === undefined ? true : !!p.activa);
+                    // Ignorar preguntas sin texto (no constituyen una pregunta)
+                    preguntas = preguntas.filter(p => p.texto && p.texto.toString().trim().length > 0);
+                    if (!preguntas || preguntas.length === 0) {
+                        section.style.display = 'none';
+                        return;
+                    }
+                let html = '';
+                for (const pregunta of preguntas) {
+                    html += `<div class="form-group">
+                        <label class="form-label">${pregunta.texto}</label>
+                        ${this.renderInputPregunta(pregunta)}
+                    </div>`;
+                }
+                container.innerHTML = html;
+                section.style.display = '';
+            } catch (e) {
+                section.style.display = 'none';
+            }
+        }
+
+        renderInputPregunta(pregunta) {
+            const name = `pregunta_${pregunta.id}`;
+            switch (pregunta.tipo) {
+                case 'numero':
+                    return `<input type="number" name="${name}" class="form-input">`;
+                case 'fecha':
+                    return `<input type="date" name="${name}" class="form-input">`;
+                default:
+                    return `<input type="text" name="${name}" class="form-input">`;
+            }
+        }
     constructor() {
         this.form = document.getElementById('informeForm');
         this.progressBar = document.getElementById('progressBar');
@@ -11,6 +75,9 @@ class FormularioDinamico {
         this.initializeEventListeners();
         this.createInitialFuturoElderField();
         this.updateProgress();
+
+        // Cargar preguntas personalizadas
+        this.cargarPreguntasPersonalizadas();
     }
 
     initializeEventListeners() {
@@ -117,12 +184,15 @@ class FormularioDinamico {
     // 👨‍🎓 Manejo de futuros élderes
     handleFuturosElderesChange() {
         const trabajaConFuturos = document.querySelector('input[name="trabajo_futuros_elderes"]:checked')?.value;
-        const futurosElderesSection = document.getElementById('futurosElderesSection');
+        const futurosElderesList = document.getElementById('futurosElderesList');
+        const placeholder = document.getElementById('futurosElderesPlaceholder');
 
         if (trabajaConFuturos === 'si') {
-            this.showSection(futurosElderesSection);
+            futurosElderesList.style.display = '';
+            if (placeholder) placeholder.style.display = 'none';
         } else {
-            this.hideSection(futurosElderesSection);
+            futurosElderesList.style.display = 'none';
+            if (placeholder) placeholder.style.display = '';
             this.clearFuturosElderes();
         }
 
@@ -153,6 +223,8 @@ class FormularioDinamico {
 
     addFuturoElderField(container, value = '') {
         const fieldIndex = container.children.length;
+        // Generar un id único para el input
+        const uniqueId = `futuro_elder_${Date.now()}_${Math.floor(Math.random()*10000)}`;
         const fieldDiv = document.createElement('div');
         fieldDiv.className = 'dynamic-item fade-in';
         
@@ -160,6 +232,7 @@ class FormularioDinamico {
             <input 
                 type="text" 
                 name="futuro_elder_${fieldIndex}" 
+                id="${uniqueId}"
                 class="form-input futuro-elder-input" 
                 placeholder="Nombre del futuro élder"
                 value="${value}"
@@ -174,8 +247,7 @@ class FormularioDinamico {
         });
 
         container.appendChild(fieldDiv);
-        // Ajustar alturas de las secciones abiertas para contener el nuevo campo
-        this.adjustAncestorHeights(container);
+        // (Eliminado ajuste de alturas)
         return input;
     }
 
@@ -197,25 +269,11 @@ class FormularioDinamico {
         setTimeout(() => {
             fieldDiv.remove();
             this.updateProgress();
-            // Ajustar alturas después de la eliminación
-            this.adjustAncestorHeights(container);
+            // (Eliminado ajuste de alturas)
         }, 300);
     }
 
-    // Ajusta maxHeight de ancestros tipo 'conditional-section' o 'form-section' abiertos
-    adjustAncestorHeights(el) {
-        let node = el;
-        while (node && node !== document.body) {
-            if (node.classList && (node.classList.contains('conditional-section') || node.classList.contains('form-section'))) {
-                if (!node.classList.contains('hidden')) {
-                    // Forzar recálculo del height para que el contenedor crezca con su contenido
-                    node.style.maxHeight = node.scrollHeight + 'px';
-                    node.style.opacity = '1';
-                }
-            }
-            node = node.parentElement;
-        }
-    }
+    // (Eliminado: no ajustar maxHeight ni opacity de form-section)
 
     clearFuturosElderes() {
         const container = document.getElementById('futurosElderesList');
@@ -225,22 +283,15 @@ class FormularioDinamico {
 
     // 👁️ Mostrar/ocultar secciones con animación
     showSection(section) {
-        // Mostrar y permitir que el contenido expanda el contenedor de forma natural
         section.classList.remove('hidden');
-        // Eliminar cualquier restricción previa de altura para que el box crezca con su contenido
-        section.style.maxHeight = 'none';
-        // Animar opacidad para una transición suave
-        setTimeout(() => { section.style.opacity = '1'; }, 10);
+        section.style.removeProperty('maxHeight');
+        section.style.removeProperty('opacity');
     }
 
     hideSection(section) {
-        // Animar opacidad y luego ocultar completamente
-        section.style.opacity = '0';
-        setTimeout(() => {
-            // Restaurar estado oculto y limpiar maxHeight
-            section.classList.add('hidden');
-            section.style.maxHeight = '';
-        }, 300);
+        section.classList.add('hidden');
+        section.style.removeProperty('maxHeight');
+        section.style.removeProperty('opacity');
     }
 
     // 📊 Actualizar barra de progreso
@@ -404,6 +455,9 @@ class FormularioDinamico {
             // Datos básicos
             nombre: document.getElementById('nombre').value.trim(),
             apellido: document.getElementById('apellido').value.trim(),
+
+            // Fecha del informe (ISO string)
+            fecha_informe: new Date().toISOString(),
 
             // Organizaciones
             tiene_organizaciones: document.querySelector('input[name="tiene_organizaciones"]:checked')?.value === 'si',

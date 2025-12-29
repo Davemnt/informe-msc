@@ -191,6 +191,12 @@
                     </div>
                 </section>
 
+                <!-- ❓ Preguntas Personalizadas -->
+                <section class="form-section" id="preguntasPersonalizadasSection" style="display:none">
+                    <h2 class="section-title">❓ Preguntas adicionales</h2>
+                    <div id="preguntasPersonalizadasContainer"></div>
+                </section>
+
                 <!-- 2️⃣ ORGANIZACIONES -->
                 <section class="form-section">
                     <h2 class="section-title">🏢 Organizaciones</h2>
@@ -331,7 +337,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">En la unidad, ¿están trabajando con nombres de futuros élderes?</label>
-                            <div class="radio-group">
+                            <div class="radio-group" style="margin-bottom: 1rem;">
                                 <label class="radio-item">
                                     <input type="radio" name="trabajo_futuros_elderes" value="si" id="futurosSi">
                                     <span>Sí</span>
@@ -341,19 +347,16 @@
                                     <span>No</span>
                                 </label>
                             </div>
-                        </div>
-
-                        <!-- Lista dinámica de futuros élderes -->
-                        <div class="conditional-section hidden" id="futurosElderesSection">
-                            <div class="form-group">
-                                <label class="form-label">Nombres de futuros élderes:</label>
-                                <div class="dynamic-list" id="futurosElderesList">
-                                    <!-- Los campos se generarán dinámicamente -->
-                                </div>
-                                <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
-                                    Al completar un campo, automáticamente aparecerá uno nuevo debajo
-                                </small>
+                            <label class="form-label">Nombres de futuros élderes:</label>
+                            <div class="dynamic-list" id="futurosElderesList" style="display:none">
+                                <!-- Los campos se generarán dinámicamente -->
                             </div>
+                            <div id="futurosElderesPlaceholder" class="futuros-elderes-placeholder">
+                              Seleccione "Sí" para agregar nombres de futuros élderes.
+                            </div>
+                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                                Al completar un campo, automáticamente aparecerá uno nuevo debajo
+                            </small>
                         </div>
                     </section>
 
