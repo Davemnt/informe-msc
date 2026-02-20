@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuestas - Sumo Consejo</title>
+    <meta name="description" content="Participa en nuestras encuestas">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/encuestas.css?v=20250102T1730">
+</head>
+<body>
+    <div class="main-container">
+        <div class="content-wrapper fade-in">
+        <!-- Header Global -->
+        <header class="page-header">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">
+                    <img src="images/sumoconsejo-logo.png" alt="Logo Sumo Consejo">
+                </div>
+                <div class="brand-text">
+                    <h1>Sumo Consejo</h1>
+                    <span>Estaca Aldo Bonzi</span>
+                </div>
+            </a>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="formulario.html" class="nav-link">Enviar Informe</a>
+                <a href="encuestas.html" class="nav-link active">Encuestas</a>
+                <a href="admin.html" class="nav-link">Admin</a>
+            </nav>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+                &#9776;
+            </button>
+        </header>
+
+        <div class="content-wrapper fade-in">
+            <!-- Título Principal -->
+            <section class="text-center mb-4 mt-2">
+                <h1 class="page-title">
+                    <span style="display:inline-block; vertical-align:middle; margin-right:8px; font-size:2rem; color:var(--color-primary);">📊</span>
+                    Encuestas Activas
+                </h1>
+                <p class="page-subtitle" style="max-width:600px; margin:0 auto;">
+                    Tu opinión es fundamental. Participa en las encuestas vigentes para ayudarnos a mejorar.
+                </p>
+            </section>
+
+            <!-- Contenedor de Encuestas -->
+            <div id="encuestasContainer">
+                <div class="loading-container">
+                    <div class="loading"></div>
+                    <p>Cargando encuestas activas...</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>&copy; 2025 Informe del Sumo Consejo • Sistema desarrollado para uso Presidencia de Estaca Aldo Bonzi.</p>
+                <p>
+                    <a href="admin.html" class="footer-link">Panel Administrativo</a>
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer" aria-live="polite" aria-atomic="true" style="position:fixed;top:16px;right:16px;z-index:2000;"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/encuestas.js?v=20250102T1730"></script>
+</body>
+</html>

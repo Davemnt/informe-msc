@@ -10,7 +10,7 @@
         /* Estilos específicos para la página de inicio */
         .hero-section {
             text-align: center;
-            padding: 3rem 0;
+            /* padding: 3rem 0; */
         }
 
         .hero-icon {
@@ -113,97 +113,96 @@
     </style>
 </head>
 <body>
-    <main class="main-container">
+    <div class="main-container">
+        
+        <!-- Header removed by user request -->
+        <!-- 
+        <header class="page-header">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">
+                    <img src="images/sumoconsejo-logo.png" alt="Logo Sumo Consejo">
+                </div>
+                <div class="brand-text">
+                    <h1>Sumo Consejo</h1>
+                    <span>Estaca Aldo Bonzi</span>
+                </div>
+            </a>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link active">Inicio</a>
+                <a href="formulario.html" class="nav-link">Enviar Informe</a>
+                <a href="encuestas.html" class="nav-link">Encuestas</a>
+                <a href="admin.html" class="nav-link">Admin</a>
+            </nav>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+                &#9776;
+            </button>
+        </header>
+        -->
+
         <div class="content-wrapper fade-in">
             <!-- Hero Section -->
-            <section class="hero-section">
-                <div class="hero-icon"></div>
-                
+            <section class="hero-section text-center mb-4">
                 <h1 class="page-title">Informe del Sumo Consejo</h1>
-                
                 <p class="page-subtitle">
-                    Sistema profesional para la recepción y administración de informes de la Estaca Verdadera!!
+                    Sistema profesional para la recepción y administración de informes de la Estaca.
                 </p>
 
-                <div class="welcome-text">
-                    <p>
-                        Bienvenido al sistema oficial de informes. Aquí podrás enviar de manera 
-                        sencilla y organizada toda la información requerida sobre las organizaciones 
-                        y unidades asignadas, contribuyendo al seguimiento efectivo de las actividades de la Estaca Aldo Bonzi.
-                    </p>
-                </div>
+                <div class="card mb-4">
+                    <div class="welcome-text">
+                        <p>
+                            Bienvenido al sistema oficial de informes. Aquí podrás enviar de manera 
+                            sencilla y organizada toda la información requerida sobre las organizaciones 
+                            y unidades asignadas, contribuyendo al seguimiento efectivo de las actividades de la Estaca Aldo Bonzi.
+                        </p>
+                    </div>
 
-                <!-- Botones principales de navegación -->
-                <div class="button-group">
-                    <a href="formulario.html" class="btn btn-primary btn-large">
-                        📝 Enviar Informe
-                    </a>
-                    <a href="admin.html" class="btn btn-secondary btn-large">
-                        👨‍💼 Administrador
-                    </a>
+                    <!-- Botones principales de navegación -->
+                    <div class="button-group mt-3">
+                        <a href="formulario.html" class="btn btn-secondary btn-large">
+                            📝 Enviar Informe
+                        </a>
+                        <a href="encuestas.html" class="btn btn-secondary btn-large">
+                            📊 Ver Encuestas
+                        </a>
+                        <a href="admin.html" class="btn btn-secondary btn-large">
+                            👨‍💼 Administrador
+                        </a>
+                    </div>
                 </div>
             </section>
 
             <!-- Features Section -->
             <section class="features-grid">
-                <div class="feature-card">
-                    <span class="feature-icon">⚡</span>
-                    <h3 class="feature-title">Formulario Dinámico</h3>
-                    <p class="feature-description">
-                        Secciones que se adaptan automáticamente según tus asignaciones organizacionales
+                <div class="card feature-card">
+                    <div class="text-center mb-2">
+                        <span class="feature-icon" style="font-size: 2rem;">⚡</span>
+                    </div>
+                    <h3 class="feature-title text-center">Formulario Dinámico</h3>
+                    <p class="feature-description text-center">
+                        Secciones que se adaptan automáticamente según tus asignaciones organizacionales.
                     </p>
                 </div>
 
-                <div class="feature-card">
-                    <span class="feature-icon">📅</span>
-                    <h3 class="feature-title">Registro Automático</h3>
-                    <p class="feature-description">
-                        La fecha de cada informe se registra automáticamente al momento del envío
+                <div class="card feature-card">
+                    <div class="text-center mb-2">
+                        <span class="feature-icon" style="font-size: 2rem;">📅</span>
+                    </div>
+                    <h3 class="feature-title text-center">Registro Automático</h3>
+                    <p class="feature-description text-center">
+                        La fecha de cada informe se registra automáticamente al momento del envío.
                     </p>
                 </div>
-
-                <!-- <div class="feature-card">
-                    <span class="feature-icon">👥</span>
-                    <h3 class="feature-title">Agrupación por Persona</h3>
-                    <p class="feature-description">
-                        Los informes se organizan automáticamente por persona para un mejor seguimiento
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <span class="feature-icon">🔐</span>
-                    <h3 class="feature-title">Panel Administrativo</h3>
-                    <p class="feature-description">
-                        Acceso completo para administradores con filtros avanzados y exportación
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <span class="feature-icon">📱</span>
-                    <h3 class="feature-title">Diseño Responsive</h3>
-                    <p class="feature-description">
-                        Funciona perfectamente en computadoras, tablets y dispositivos móviles
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <span class="feature-icon">✅</span>
-                    <h3 class="feature-title">Validaciones Inteligentes</h3>
-                    <p class="feature-description">
-                        Sistema de validaciones que garantiza la completitud de la información
-                    </p>
-                </div> -->
             </section>
 
             <!-- Instructions Section -->
-            <section class="card">
+            <section class="card mt-4">
                 <div class="card-header">
                     <h2 class="card-title">📖 Instrucciones de Uso</h2>
                 </div>
                 
-                <div class="welcome-text text-left">
-                    <p><strong>Para enviar un informe:</strong></p>
-                    <ul style="margin: 1rem 0 1rem 2rem;">
+                <div class="text-left">
+                    <p class="mb-2"><strong>Para enviar un informe:</strong></p>
+                    <ul style="margin: 0 0 1.5rem 2rem; color: var(--color-grafito);">
                         <li>Haz clic en "Enviar Informe"</li>
                         <li>Completa tus datos personales</li>
                         <li>Selecciona las organizaciones que tienes asignadas</li>
@@ -212,8 +211,8 @@
                         <li>Envía el formulario</li>
                     </ul>
 
-                    <p><strong>Para administradores:</strong></p>
-                    <ul style="margin: 1rem 0 1rem 2rem;">
+                    <p class="mb-2"><strong>Para administradores:</strong></p>
+                    <ul style="margin: 0 0 1rem 2rem; color: var(--color-grafito);">
                         <li>Accede al panel administrativo</li>
                         <li>Ingresa con tus credenciales</li>
                         <li>Visualiza todos los informes recibidos</li>
@@ -224,37 +223,17 @@
             </section>
 
             <!-- Footer -->
-            <footer class="footer-section">
-                <p class="footer-text">
+            <footer class="main-footer">
+                <p>
                     © 2025 Informe del Sumo Consejo • Sistema desarrollado para uso Presidencia de Estaca Aldo Bonzi
                 </p>
             </footer>
         </div>
-    </main>
+    </div>
 
     <script>
         // Animación de entrada
         document.addEventListener('DOMContentLoaded', function() {
-            // Aplicar animación fade-in a las tarjetas de características
-            const featureCards = document.querySelectorAll('.feature-card');
-            featureCards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('fade-in');
-                }, index * 100);
-            });
-
-            // Agregar efectos interactivos a los botones
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(button => {
-                button.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                });
-
-                button.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-
             // Verificar si hay mensajes de éxito en la URL
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('success') === 'true') {
@@ -276,21 +255,7 @@
                 messageDiv.remove();
             }, 5000);
         }
-
-        // Verificación de disponibilidad del servidor
-        async function checkServerStatus() {
-            try {
-                const response = await fetch('/api/health');
-                if (!response.ok) {
-                    console.log('Servidor no disponible, usando modo offline');
-                }
-            } catch (error) {
-                console.log('Servidor no disponible, usando modo offline');
-            }
-        }
-
-        // Verificar estado del servidor al cargar
-        checkServerStatus();
     </script>
+    <script src="js/menu.js"></script>
 </body>
 </html>

@@ -91,14 +91,31 @@
         }
 
         .validation-error {
-            color: var(--color-naranja);
+            color: #dc3545;
             font-size: 0.875rem;
             margin-top: 0.5rem;
             display: none;
+            font-weight: 500;
         }
 
         .validation-error.show {
             display: block;
+        }
+
+        /* Resaltar campos con error */
+        .form-input.error,
+        .form-select.error,
+        .form-textarea.error {
+            border-color: #dc3545 !important;
+            background-color: #fff5f5;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+        }
+
+        .form-input.error:focus,
+        .form-select.error:focus,
+        .form-textarea.error:focus {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.25) !important;
         }
 
         .form-progress {
@@ -145,18 +162,56 @@
     </style>
 </head>
 <body>
-    <main class="main-container">
+    <div class="main-container">
+
+        <!-- Header Global -->
+        <header class="page-header">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">
+                    <img src="images/sumoconsejo-logo.png" alt="Logo Sumo Consejo">
+                </div>
+                <div class="brand-text">
+                    <h1>Sumo Consejo</h1>
+                    <span>Estaca Aldo Bonzi</span>
+                </div>
+            </a>
+            <nav class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="formulario.html" class="nav-link active">Enviar Informe</a>
+                <a href="encuestas.html" class="nav-link">Encuestas</a>
+                <a href="admin.html" class="nav-link">Admin</a>
+            </nav>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+                &#9776;
+            </button>
+        </header>
+
         <div class="content-wrapper form-container fade-in">
-            <!-- Header del formulario -->
-            <div class="form-header">
-                <h1 class="page-title">📝 Formulario de Informe</h1>
-                <p class="page-subtitle">
-                    Complete la información solicitada. Los campos marcados con (*) son obligatorios.
-                </p>
-                
+            
+            <div class="card mb-4">
+                <div class="form-banner" style="overflow: hidden; border-radius: var(--border-radius-sm); margin-bottom: 2rem;">
+                    <!-- Banner Image -->
+                    <img src="images/temple.jpg" 
+                         alt="Portada" 
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.style.display='none'">
+                </div>
+
+                <div class="text-center mb-4">
+                    <h1 class="page-title">Informe del Sumo Consejo</h1>
+                    <p class="page-subtitle">
+                        "Y el que fuere hallado mayordomo fiel, justo y sabio entrará en el gozo de su Señor y heredará la vida eterna. De cierto te digo, soy Jesucristo, el cual viene pronto, a la hora que no pensáis. Así sea. Amén."
+                        <br><strong>DYC 51: 19-20</strong>
+                    </p>
+                </div>
+
                 <!-- Barra de progreso -->
                 <div class="form-progress">
                     <div class="form-progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="message message-info text-center">
+                    Los campos marcados con (*) son obligatorios.
                 </div>
             </div>
 
@@ -167,48 +222,51 @@
             <form id="informeForm" novalidate>
                 
                 <!-- 1️⃣ DATOS DEL INFORMANTE -->
-                <section class="form-section">
-                    <h2 class="section-title">👤 Datos del Informante</h2>
+                <section class="card form-section">
+                    <div class="card-header">
+                        <h2 class="card-title">👤 Datos del Informante</h2>
+                    </div>
                     
                     <div class="form-group">
                         <label for="nombre" class="form-label required">Nombre</label>
-                        <input type="text" id="nombre" name="nombre" class="form-input" required>
+                        <input type="text" id="nombre" name="nombre" class="form-control" required>
                         <div class="validation-error" id="nombreError">El nombre es obligatorio</div>
                     </div>
 
                     <div class="form-group">
                         <label for="apellido" class="form-label required">Apellido</label>
-                        <input type="text" id="apellido" name="apellido" class="form-input" required>
+                        <input type="text" id="apellido" name="apellido" class="form-control" required>
                         <div class="validation-error" id="apellidoError">El apellido es obligatorio</div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Fecha del Informe</label>
-                        <input type="text" value="Se registrará automáticamente al enviar" class="form-input" disabled>
-                        <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
-                            La fecha se genera automáticamente por el sistema
-                        </small>
+                        <input type="text" value="Se registrará automáticamente al enviar" class="form-control" disabled style="background-color: var(--color-gris-claro);">
                     </div>
                 </section>
 
                 <!-- ❓ Preguntas Personalizadas -->
-                <section class="form-section" id="preguntasPersonalizadasSection" style="display:none">
-                    <h2 class="section-title">❓ Preguntas adicionales</h2>
+                <section class="card form-section" id="preguntasPersonalizadasSection" style="display:none">
+                    <div class="card-header">
+                        <h2 class="card-title">❓ Preguntas adicionales</h2>
+                    </div>
                     <div id="preguntasPersonalizadasContainer"></div>
                 </section>
 
                 <!-- 2️⃣ ORGANIZACIONES -->
-                <section class="form-section">
-                    <h2 class="section-title">🏢 Organizaciones</h2>
+                <section class="card form-section">
+                    <div class="card-header">
+                        <h2 class="card-title">🏢 Organizaciones</h2>
+                    </div>
                     
                     <div class="form-group">
                         <label class="form-label">¿Tiene alguna organización asignada?</label>
-                        <div class="radio-group">
-                            <label class="radio-item">
+                        <div class="radio-group" style="display:flex; gap:1rem;">
+                            <label class="check-item">
                                 <input type="radio" name="tiene_organizaciones" value="si" id="orgSi">
                                 <span>Sí</span>
                             </label>
-                            <label class="radio-item">
+                            <label class="check-item">
                                 <input type="radio" name="tiene_organizaciones" value="no" id="orgNo">
                                 <span>No</span>
                             </label>
@@ -219,52 +277,52 @@
                     <div class="conditional-section hidden" id="organizacionesSection">
                         <div class="form-group">
                             <label class="form-label">Seleccione las organizaciones que tiene asignadas:</label>
-                            <div class="checkbox-grid" id="organizacionesCheckboxes">
-                                <label class="checkbox-item">
+                            <div class="checkbox-grid" id="organizacionesCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Hombres Jóvenes">
                                     <span>Hombres Jóvenes</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Mujeres Jóvenes">
                                     <span>Mujeres Jóvenes</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Primaria">
                                     <span>Primaria</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="JAS">
                                     <span>JAS</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Obra Misional">
                                     <span>Obra Misional</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Autosuficiencia">
                                     <span>Autosuficiencia</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Sociedad de Socorro">
                                     <span>Sociedad de Socorro</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Historia Familiar y Templo">
                                     <span>Historia Familiar y Templo</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Escuela Dominical">
                                     <span>Escuela Dominical</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Seminario">
                                     <span>Seminario</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="Instituto">
                                     <span>Instituto</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="organizaciones" value="AS">
                                     <span>AS</span>
                                 </label>
@@ -277,17 +335,19 @@
                 </section>
 
                 <!-- 3️⃣ UNIDADES / BARRIOS -->
-                <section class="form-section">
-                    <h2 class="section-title">🏛️ Unidades / Barrios</h2>
+                <section class="card form-section">
+                    <div class="card-header">
+                        <h2 class="card-title">🏛️ Unidades / Barrios</h2>
+                    </div>
                     
                     <div class="form-group">
                         <label class="form-label">¿Tiene alguna unidad asignada?</label>
-                        <div class="radio-group">
-                            <label class="radio-item">
+                        <div class="radio-group" style="display:flex; gap:1rem;">
+                            <label class="check-item">
                                 <input type="radio" name="tiene_unidades" value="si" id="unidadSi">
                                 <span>Sí</span>
                             </label>
-                            <label class="radio-item">
+                            <label class="check-item">
                                 <input type="radio" name="tiene_unidades" value="no" id="unidadNo">
                                 <span>No</span>
                             </label>
@@ -298,28 +358,28 @@
                     <div class="conditional-section hidden" id="unidadesSection">
                         <div class="form-group">
                             <label class="form-label">Seleccione las unidades que tiene asignadas:</label>
-                            <div class="checkbox-grid" id="unidadesCheckboxes">
-                                <label class="checkbox-item">
+                            <div class="checkbox-grid" id="unidadesCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Aldo Bonzi">
                                     <span>Aldo Bonzi</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Ciudad Evita 1">
                                     <span>Ciudad Evita 1</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Ciudad Evita 2">
                                     <span>Ciudad Evita 2</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Cristianía">
                                     <span>Cristianía</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Villa Celina">
                                     <span>Villa Celina</span>
                                 </label>
-                                <label class="checkbox-item">
+                                <label class="check-item">
                                     <input type="checkbox" name="unidades" value="Villa Madero">
                                     <span>Villa Madero</span>
                                 </label>
@@ -332,17 +392,19 @@
                 <div id="unidadConditionalSections" class="hidden">
 
                     <!-- 4️⃣ FUTUROS ÉLDERES -->
-                    <section class="form-section">
-                        <h2 class="section-title">👨‍🎓 Futuros Élderes</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">👨‍🎓 Futuros Élderes</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">En la unidad, ¿están trabajando con nombres de futuros élderes?</label>
-                            <div class="radio-group" style="margin-bottom: 1rem;">
-                                <label class="radio-item">
+                            <div class="radio-group" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <label class="check-item">
                                     <input type="radio" name="trabajo_futuros_elderes" value="si" id="futurosSi">
                                     <span>Sí</span>
                                 </label>
-                                <label class="radio-item">
+                                <label class="check-item">
                                     <input type="radio" name="trabajo_futuros_elderes" value="no" id="futurosNo">
                                     <span>No</span>
                                 </label>
@@ -351,27 +413,29 @@
                             <div class="dynamic-list" id="futurosElderesList" style="display:none">
                                 <!-- Los campos se generarán dinámicamente -->
                             </div>
-                            <div id="futurosElderesPlaceholder" class="futuros-elderes-placeholder">
+                            <div id="futurosElderesPlaceholder" class="futuros-elderes-placeholder" style="text-align: center; padding: 1rem; color: var(--color-gris-oscuro); border: 1px dashed var(--color-gris-medio); border-radius: var(--border-radius-sm);">
                               Seleccione "Sí" para agregar nombres de futuros élderes.
                             </div>
-                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
+                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem; display: block; margin-top: 0.5rem;">
                                 Al completar un campo, automáticamente aparecerá uno nuevo debajo
                             </small>
                         </div>
                     </section>
 
                     <!-- 5️⃣ REUNIÓN DE PRESIDENCIA -->
-                    <section class="form-section">
-                        <h2 class="section-title">👥 Reunión de Presidencia</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">👥 Reunión de Presidencia</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">¿Tuvieron su reunión de presidencia este mes?</label>
-                            <div class="radio-group">
-                                <label class="radio-item">
+                            <div class="radio-group" style="display:flex; gap:1rem;">
+                                <label class="check-item">
                                     <input type="radio" name="reunion_presidencia" value="si">
                                     <span>Sí</span>
                                 </label>
-                                <label class="radio-item">
+                                <label class="check-item">
                                     <input type="radio" name="reunion_presidencia" value="no">
                                     <span>No</span>
                                 </label>
@@ -380,17 +444,19 @@
                     </section>
 
                     <!-- 6️⃣ MINISTRACIÓN -->
-                    <section class="form-section">
-                        <h2 class="section-title">🤝 Ministración</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">🤝 Ministración</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">¿Llevaron a cabo entrevistas de ministración?</label>
-                            <div class="radio-group">
-                                <label class="radio-item">
+                            <div class="radio-group" style="display:flex; gap:1rem;">
+                                <label class="check-item">
                                     <input type="radio" name="entrevistas_ministracion" value="si">
                                     <span>Sí</span>
                                 </label>
-                                <label class="radio-item">
+                                <label class="check-item">
                                     <input type="radio" name="entrevistas_ministracion" value="no">
                                     <span>No</span>
                                 </label>
@@ -399,15 +465,17 @@
                     </section>
 
                     <!-- 7️⃣ INFORME DETALLADO (OBLIGATORIO CON UNIDAD) -->
-                    <section class="form-section">
-                        <h2 class="section-title">📋 Informe Detallado</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">📋 Informe Detallado</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label for="informeDetallado" class="form-label required">Informe detallado</label>
                             <textarea 
                                 id="informeDetallado" 
                                 name="informe_detallado" 
-                                class="form-textarea" 
+                                class="form-control" 
                                 rows="12"
                                 placeholder="Proporcione un informe detallado de las actividades, avances y observaciones relevantes..."
                                 required
@@ -415,9 +483,6 @@
                             <div class="validation-error" id="informeDetalladoError">
                                 El informe detallado es obligatorio cuando tiene unidades asignadas
                             </div>
-                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
-                                Sin límite de caracteres. Sea específico y detallado en su informe.
-                            </small>
                         </div>
                     </section>
 
@@ -427,17 +492,19 @@
                 <div id="soloOrganizacionSection" class="hidden">
                     
                     <!-- REUNIÓN DE PRESIDENCIA (ORGANIZACIÓN) -->
-                    <section class="form-section">
-                        <h2 class="section-title">👥 Reunión de Presidencia de Organización</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">👥 Reunión de Presidencia de Organización</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">¿Tuvo reunión de presidencia este mes?</label>
-                            <div class="radio-group">
-                                <label class="radio-item">
+                            <div class="radio-group" style="display:flex; gap:1rem;">
+                                <label class="check-item">
                                     <input type="radio" name="reunion_presidencia_org" value="si">
                                     <span>Sí</span>
                                 </label>
-                                <label class="radio-item">
+                                <label class="check-item">
                                     <input type="radio" name="reunion_presidencia_org" value="no">
                                     <span>No</span>
                                 </label>
@@ -446,43 +513,42 @@
                     </section>
 
                     <!-- INFORME DETALLADO (ORGANIZACIÓN) -->
-                    <section class="form-section">
-                        <h2 class="section-title">📋 Informe de Organización</h2>
+                    <section class="card form-section">
+                        <div class="card-header">
+                            <h2 class="card-title">📋 Informe de Organización</h2>
+                        </div>
                         
                         <div class="form-group">
                             <label for="informeOrganizacion" class="form-label">Informe detallado</label>
                             <textarea 
                                 id="informeOrganizacion" 
                                 name="informe_organizacion" 
-                                class="form-textarea" 
+                                class="form-control" 
                                 rows="12"
                                 placeholder="Proporcione un informe sobre las actividades y avances de su organización..."
                             ></textarea>
-                            <small style="color: var(--color-gris-oscuro); font-size: 0.875rem;">
-                                Describa las actividades, logros y desafíos de su organización
-                            </small>
                         </div>
                     </section>
 
                 </div>
 
                 <!-- 📤 BOTÓN DE ENVÍO -->
-                <div class="submit-container">
-                    <button type="submit" class="btn btn-primary btn-large btn-full" id="submitBtn">
+                <div class="card mb-4">
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="padding: 1rem; font-size: 1.125rem;">
                         <span id="submitText">📤 Enviar Informe</span>
                         <span id="submitLoading" class="loading hidden"></span>
                     </button>
                     
                     <div style="text-align: center; margin-top: 1rem;">
                         <a href="index.html" class="btn btn-secondary">
-                            ← Volver al Inicio
+                            Cancelar
                         </a>
                     </div>
                 </div>
 
             </form>
         </div>
-    </main>
+    </div>
 
     <!-- Script del formulario -->
     <!-- Firebase SDK (compat) + init -->
@@ -491,5 +557,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/formulario.js"></script>
+    <script src="js/menu.js"></script>
 </body>
 </html>

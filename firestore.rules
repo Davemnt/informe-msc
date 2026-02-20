@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Colección de informes - solo usuarios autenticados pueden escribir
+    match /informes/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Colección de preguntas - solo admin puede escribir, todos pueden leer
+    match /preguntas/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Colección de encuestas - admin puede escribir, todos pueden leer las activas
+    match /encuestas/{document} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null || resource.data.activa == true;
+      allow delete: if request.auth != null;
+    }
+    
+    // Colección de votos - todos pueden escribir (una vez), admin puede leer
+    match /votos/{document} {
+      allow read: if request.auth != null;
+      allow create: if true;
+    }
+  }
+}

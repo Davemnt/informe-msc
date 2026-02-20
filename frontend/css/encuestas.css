@@ -1,0 +1,213 @@
+/* ===============================================
+   ESTILOS ESPECÍFICOS PARA PÁGINA DE ENCUESTAS
+   (Complementa a styles.css)
+   =============================================== */
+
+/* Animaciones específicas para tarjetas de encuesta */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.poll-card {
+    background: var(--color-blanco);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+    border: 1px solid var(--color-gris-claro);
+    transition: var(--transition);
+    animation: slideInUp 0.5s ease-out forwards;
+}
+
+.poll-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary-light);
+}
+
+.poll-title {
+    color: var(--color-primary-dark);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.poll-question {
+    font-size: 1.1rem;
+    color: var(--color-grafito);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Opciones de encuesta */
+.poll-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.poll-option {
+    position: relative;
+    padding: 1rem 1.5rem;
+    border: 2px solid var(--color-gris-medio);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.poll-option:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-bg);
+}
+
+.poll-option.selected {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-bg);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.poll-option-text {
+    font-weight: 500;
+    color: var(--color-negro);
+}
+
+/* Barra de resultados */
+.result-bar-container {
+    height: 8px;
+    background-color: var(--color-gris-claro);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.result-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    border-radius: 4px;
+    width: 0;
+    transition: width 1s ease-out;
+}
+
+.vote-count {
+    font-size: 0.85rem;
+    color: var(--color-gris-oscuro);
+    margin-top: 0.25rem;
+    text-align: right;
+}
+
+/* Estado vacío */
+.no-polls {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--color-blanco);
+    border-radius: var(--border-radius);
+    color: var(--color-gris-oscuro);
+    border: 1px dashed var(--color-gris-medio);
+}
+
+.no-polls-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    display: block;
+}
+
+/* ===============================================
+   RESPONSIVE DESIGN
+   =============================================== */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .poll-card {
+        padding: 1.5rem;
+    }
+    
+    .poll-title {
+        font-size: 1.35rem;
+    }
+    
+    .poll-question {
+        font-size: 1.05rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+    .poll-card {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .poll-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .poll-question {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .poll-option {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+    }
+    
+    .vote-count {
+        font-size: 0.8rem;
+    }
+    
+    .no-polls {
+        padding: 3rem 1.5rem;
+    }
+    
+    .no-polls-icon {
+        font-size: 3rem;
+    }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .poll-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .poll-title {
+        font-size: 1.15rem;
+    }
+    
+    .poll-question {
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .poll-option {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .poll-option-text {
+        font-size: 0.9rem;
+    }
+    
+    .result-bar-container {
+        height: 6px;
+    }
+    
+    .no-polls {
+        padding: 2rem 1rem;
+    }
+}

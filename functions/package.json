@@ -1,27 +1,31 @@
 {
   "name": "functions",
-  "description": "Cloud Functions for Firebase",
+  "version": "1.0.0",
+  "description": "Cloud Functions and local Express API for Informe Sumo Consejo",
+  "main": "index.js",
+  "engines": {
+    "node": "16"
+  },
   "scripts": {
     "lint": "eslint .",
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
-    "start": "npm run shell",
+    "start": "node localServer.js",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
-  "engines": {
-  },
-  "main": "index.js",
-        "bcryptjs": "^3.0.3",
-        "cors": "^2.8.5"
-    "express": "^5.2.1",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
     "firebase-admin": "^13.6.0",
-    "firebase-functions": "^7.0.0",
-    "helmet": "^8.1.0",
+    "firebase-functions": "^4.4.0",
+    "helmet": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "sqlite3": "^5.1.7"
   },
-  "main": "index.js",
-    "eslint": "^8.15.0",
-  "scripts": {},
-    "eslint": "^8.15.0",
+  "devDependencies": {
+    "eslint": "^8.15.0"
+  }
+}
