@@ -89,36 +89,82 @@ class AdminPanel {
                     window.showToast('Error al editar pregunta', 'error');
                 }
             }
-        // Obtener IDs de informes visualizados desde localStorage
-        getVisualizados() {
+        // Obtener IDs de informes visualizados (sincronizado en Firestore)
+        async getVisualizados() {
+            try {
+                // Intentar obtener de Firestore si está disponible
+                if (window.firebaseApp && window.firebaseApp.db && this.currentUser) {
+                    const docRef = window.firebaseApp.db.collection('informes_vistos').doc(this.currentUser);
+                    const doc = await docRef.get();
+                    
+                    if (doc.exists) {
+                        const data = doc.data();
+                        console.log('Informes vistos cargados de Firestore:', data.ids?.length || 0);
+                        return data.ids || [];
+                    } else {
+                        console.log('No hay informes vistos en Firestore para este usuario');
+                        return [];
+                    }
+                }
+            } catch (error) {
+                console.warn('Error obteniendo informes vistos de Firestore, usando localStorage:', error);
+            }
+            
+            // Fallback a localStorage
             const v = localStorage.getItem('informesVisualizados');
             return v ? JSON.parse(v) : [];
         }
 
-        // Guardar IDs de informes visualizados en localStorage
-        setVisualizados(ids) {
+        // Guardar IDs de informes visualizados (sincronizado en Firestore)
+        async setVisualizados(ids) {
+            try {
+                // Guardar en Firestore si está disponible
+                if (window.firebaseApp && window.firebaseApp.db && this.currentUser) {
+                    const docRef = window.firebaseApp.db.collection('informes_vistos').doc(this.currentUser);
+                    await docRef.set({
+                        ids: ids,
+                        usuario: this.currentUser,
+                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log('Informes vistos guardados en Firestore:', ids.length);
+                    
+                    // También guardar en localStorage como cache
+                    localStorage.setItem('informesVisualizados', JSON.stringify(ids));
+                    return;
+                }
+            } catch (error) {
+                console.error('Error guardando informes vistos en Firestore:', error);
+                console.warn('Usando localStorage como fallback');
+            }
+            
+            // Fallback a localStorage
             localStorage.setItem('informesVisualizados', JSON.stringify(ids));
         }
 
         // Marcar un informe como visualizado
-        marcarVisualizado(id) {
-            const visualizados = this.getVisualizados();
+        async marcarVisualizado(id) {
+            const visualizados = await this.getVisualizados();
             if (!visualizados.includes(id)) {
                 visualizados.push(id);
-                this.setVisualizados(visualizados);
+                await this.setVisualizados(visualizados);
             }
         }
 
         // Marcar como visto y actualizar vistas
-        marcarComoVisto(id) {
-            this.marcarVisualizado(id);
+        async marcarComoVisto(id) {
+            console.log('Marcando informe como visto:', id);
+            await this.marcarVisualizado(id);
             window.showToast('Informe marcado como visto', 'success');
+            
+            // Actualizar estadísticas
+            await this.loadStats();
             
             // Actualizar la vista actual
             if (this.currentTab === 'todos') {
-                this.loadTodosInformes();
+                await this.loadTodosInformes();
             } else if (this.currentTab === 'visualizados') {
-                this.loadVisualizados();
+                await this.loadVisualizados();
             }
         }
     constructor() {
@@ -217,7 +263,7 @@ class AdminPanel {
                     this.currentUser = adminEmail;
 
                     this.showLoginMessage('¡Login exitoso! Cargando panel...', 'success');
-                    setTimeout(() => this.showAdminPanel(), 800);
+                    setTimeout(async () => await this.showAdminPanel(), 800);
                 } catch (fbErr) {
                     console.error('Firebase signIn error:', fbErr);
                     const msg = (fbErr && (fbErr.message || fbErr.code)) ? (fbErr.message || fbErr.code) : 'Error de autenticación con Firebase';
@@ -238,7 +284,7 @@ class AdminPanel {
                     this.token = data.token;
                     this.currentUser = data.usuario;
                     this.showLoginMessage('¡Login exitoso! Cargando panel...', 'success');
-                    setTimeout(() => this.showAdminPanel(), 800);
+                    setTimeout(async () => await this.showAdminPanel(), 800);
                 } else {
                     this.showLoginMessage(data.error || 'Error de autenticación', 'error');
                 }
@@ -251,7 +297,7 @@ class AdminPanel {
         }
     }
 
-    showAdminPanel() {
+    async showAdminPanel() {
         const loginScreen = document.getElementById('loginScreen');
         const adminPanel = document.getElementById('adminPanel');
         const adminUserElement = document.getElementById('adminUser');
@@ -263,6 +309,9 @@ class AdminPanel {
             adminUserElement.textContent = `👤 ${this.currentUser}`;
         }
 
+        // Sincronizar informes vistos entre localStorage y Firestore
+        await this.syncInformesVistos();
+        
         // Cargar datos iniciales
         this.loadInitialData();
     }
@@ -310,6 +359,49 @@ class AdminPanel {
     }
 
     // 📊 Carga de datos y estadísticas
+    async syncInformesVistos() {
+        try {
+            console.log('Sincronizando informes vistos...');
+            
+            // Obtener datos de localStorage
+            const localData = localStorage.getItem('informesVisualizados');
+            const localIds = localData ? JSON.parse(localData) : [];
+            
+            // Si hay Firebase disponible
+            if (window.firebaseApp && window.firebaseApp.db && this.currentUser) {
+                const docRef = window.firebaseApp.db.collection('informes_vistos').doc(this.currentUser);
+                const doc = await docRef.get();
+                
+                if (doc.exists) {
+                    // Ya existe en Firestore, usar esos datos
+                    const firestoreData = doc.data();
+                    const firestoreIds = firestoreData.ids || [];
+                    console.log('Datos en Firestore:', firestoreIds.length);
+                    
+                    // Combinar ambos conjuntos de datos (sin duplicados)
+                    const combined = [...new Set([...localIds, ...firestoreIds])];
+                    
+                    if (combined.length > firestoreIds.length) {
+                        // Hay nuevos datos en localStorage, actualizar Firestore
+                        console.log('Actualizando Firestore con datos locales...');
+                        await this.setVisualizados(combined);
+                    } else {
+                        // Firestore está actualizado, solo actualizar localStorage
+                        localStorage.setItem('informesVisualizados', JSON.stringify(firestoreIds));
+                    }
+                } else if (localIds.length > 0) {
+                    // No existe en Firestore pero hay datos locales, migrarlos
+                    console.log('Migrando datos locales a Firestore...');
+                    await this.setVisualizados(localIds);
+                }
+            }
+            
+            console.log('Sincronización completada');
+        } catch (error) {
+            console.error('Error en sincronización de informes vistos:', error);
+        }
+    }
+    
     async loadInitialData() {
         console.log('AdminPanel.loadInitialData: start', { token: this.token, firebaseApp: !!window.firebaseApp });
         try {
@@ -342,7 +434,7 @@ class AdminPanel {
         }
     }
 
-    updateStats(informes) {
+    async updateStats(informes) {
         const today = new Date().toISOString().split('T')[0];
         const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -351,7 +443,7 @@ class AdminPanel {
         const informesHoy = informes.filter(i => typeof i.fecha_informe === 'string' && i.fecha_informe.startsWith(today)).length;
         
         // Calcular informes visualizados y pendientes
-        const visualizados = this.getVisualizados();
+        const visualizados = await this.getVisualizados();
         const informesVistos = informes.filter(i => visualizados.includes(i.id)).length;
         const informesPendientes = totalInformes - informesVistos;
 
@@ -676,7 +768,7 @@ class AdminPanel {
             if (window.firebaseApp && typeof window.firebaseApp.fetchAllInformes === 'function') {
                 const all = await window.firebaseApp.fetchAllInformes();
                 // Filtrar solo los NO visualizados
-                const visualizados = this.getVisualizados();
+                const visualizados = await this.getVisualizados();
                 const noVisualizados = all.filter(i => !visualizados.includes(i.id));
                 this.renderTodosInformes(noVisualizados, container);
             } else {
@@ -709,7 +801,7 @@ class AdminPanel {
             // Usar Firestore si está disponible
             if (window.firebaseApp && typeof window.firebaseApp.fetchAllInformes === 'function') {
                 const all = await window.firebaseApp.fetchAllInformes();
-                const visualizados = this.getVisualizados();
+                const visualizados = await this.getVisualizados();
                 const informesVisualizados = all.filter(i => visualizados.includes(i.id));
                 this.renderTodosInformes(informesVisualizados, container);
             } else {
@@ -717,7 +809,7 @@ class AdminPanel {
                 const response = await this.fetchWithAuth('/api/admin/informes');
                 if (response.ok) {
                     const data = await response.json();
-                    const visualizados = this.getVisualizados();
+                    const visualizados = await this.getVisualizados();
                     const informesVisualizados = data.informes.filter(i => visualizados.includes(i.id));
                     this.renderTodosInformes(informesVisualizados, container);
                 } else {
@@ -1134,8 +1226,10 @@ class AdminPanel {
                     this.allInformes = data.informes;
                     const informeFound = this.allInformes.find(i => i.id === id);
                     if (informeFound) {
-                        this.marcarVisualizado(informeFound.id);
+                        await this.marcarVisualizado(informeFound.id);
                         this.showInformeModal(informeFound);
+                        // Actualizar estadísticas después de marcar como visto
+                        await this.loadStats();
                     } else {
                         throw new Error('Informe no encontrado');
                     }
@@ -1143,8 +1237,10 @@ class AdminPanel {
                     throw new Error('Error cargando informe');
                 }
             } else {
-                this.marcarVisualizado(informe.id);
+                await this.marcarVisualizado(informe.id);
                 this.showInformeModal(informe);
+                // Actualizar estadísticas después de marcar como visto
+                await this.loadStats();
             }
         } catch (error) {
             console.error('Error mostrando informe:', error);
@@ -1326,6 +1422,15 @@ class AdminPanel {
     closeModal() {
         const modal = document.getElementById('informeModal');
         modal.style.display = 'none';
+        
+        // Actualizar vistas de informes si estamos en las pestañas de informes
+        if (this.currentTab === 'todos' || this.currentTab === 'visualizados') {
+            if (this.currentTab === 'todos') {
+                this.loadTodosInformes();
+            } else if (this.currentTab === 'visualizados') {
+                this.loadVisualizados();
+            }
+        }
     }
 
     // 🔄 Funciones de utilidad
