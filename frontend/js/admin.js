@@ -108,6 +108,19 @@ class AdminPanel {
                 this.setVisualizados(visualizados);
             }
         }
+
+        // Marcar como visto y actualizar vistas
+        marcarComoVisto(id) {
+            this.marcarVisualizado(id);
+            window.showToast('Informe marcado como visto', 'success');
+            
+            // Actualizar la vista actual
+            if (this.currentTab === 'todos') {
+                this.loadTodosInformes();
+            } else if (this.currentTab === 'visualizados') {
+                this.loadVisualizados();
+            }
+        }
     constructor() {
         this.token = localStorage.getItem('adminToken');
         this.currentUser = localStorage.getItem('adminUser');
@@ -336,12 +349,17 @@ class AdminPanel {
         const totalInformes = informes.length;
         const totalPersonas = new Set(informes.map(i => `${i.nombre} ${i.apellido}`)).size;
         const informesHoy = informes.filter(i => typeof i.fecha_informe === 'string' && i.fecha_informe.startsWith(today)).length;
-        const informesMes = informes.filter(i => typeof i.fecha_informe === 'string' && i.fecha_informe.startsWith(currentMonth)).length;
+        
+        // Calcular informes visualizados y pendientes
+        const visualizados = this.getVisualizados();
+        const informesVistos = informes.filter(i => visualizados.includes(i.id)).length;
+        const informesPendientes = totalInformes - informesVistos;
 
         document.getElementById('totalInformes').textContent = totalInformes;
         document.getElementById('totalPersonas').textContent = totalPersonas;
         document.getElementById('informesHoy').textContent = informesHoy;
-        document.getElementById('informesMes').textContent = informesMes;
+        document.getElementById('informesVistos').textContent = informesVistos;
+        document.getElementById('informesPendientes').textContent = informesPendientes;
     }
 
     // 📋 Gestión de tabs
@@ -687,14 +705,24 @@ class AdminPanel {
                     <p>Cargando informes visualizados...</p>
                 </div>
             `;
-            const response = await this.fetchWithAuth('/api/admin/informes');
-            if (response.ok) {
-                const data = await response.json();
+            
+            // Usar Firestore si está disponible
+            if (window.firebaseApp && typeof window.firebaseApp.fetchAllInformes === 'function') {
+                const all = await window.firebaseApp.fetchAllInformes();
                 const visualizados = this.getVisualizados();
-                const informesVisualizados = data.informes.filter(i => visualizados.includes(i.id));
+                const informesVisualizados = all.filter(i => visualizados.includes(i.id));
                 this.renderTodosInformes(informesVisualizados, container);
             } else {
-                throw new Error('Error cargando informes visualizados');
+                // Fallback al API
+                const response = await this.fetchWithAuth('/api/admin/informes');
+                if (response.ok) {
+                    const data = await response.json();
+                    const visualizados = this.getVisualizados();
+                    const informesVisualizados = data.informes.filter(i => visualizados.includes(i.id));
+                    this.renderTodosInformes(informesVisualizados, container);
+                } else {
+                    throw new Error('Error cargando informes visualizados');
+                }
             }
         } catch (error) {
             console.error('Error cargando informes visualizados:', error);
@@ -710,6 +738,7 @@ class AdminPanel {
     }
 
     renderTodosInformes(informes, container) {
+        // Vista de tabla para desktop
         const tableHTML = `
             <table class="data-table">
                 <thead>
@@ -727,7 +756,15 @@ class AdminPanel {
                 </tbody>
             </table>
         `;
-        container.innerHTML = tableHTML;
+        
+        // Vista de tarjetas para móvil
+        const mobileHTML = `
+            <div class="mobile-informes-container">
+                ${informes.length > 0 ? informes.map(informe => this.renderMobileCard(informe)).join('') : `<div class="no-data"><p>📭 No hay informes registrados</p></div>`}
+            </div>
+        `;
+        
+        container.innerHTML = tableHTML + mobileHTML;
     }
 
     renderInformeRow(informe) {
@@ -766,9 +803,69 @@ class AdminPanel {
                         <button class="btn btn-primary btn-small" onclick="verInforme('${informe.id}')">
                             👁️ Ver
                         </button>
+                        <button class="btn btn-success btn-small" onclick="admin.marcarComoVisto('${informe.id}')" title="Marcar como visto">
+                            ✓ Visto
+                        </button>
                     </div>
                 </td>
             </tr>
+        `;
+    }
+
+    // Renderizar tarjeta móvil para un informe
+    renderMobileCard(informe) {
+        let fecha = 'Sin fecha';
+        if (informe.fecha_informe) {
+            if (typeof informe.fecha_informe === 'string') {
+                const d = new Date(informe.fecha_informe);
+                if (!isNaN(d)) fecha = d.toLocaleDateString('es-ES');
+            } else if (informe.fecha_informe.toDate) {
+                // Firestore Timestamp
+                const d = informe.fecha_informe.toDate();
+                if (!isNaN(d)) fecha = d.toLocaleDateString('es-ES');
+            }
+        }
+        const organizaciones = informe.organizaciones && informe.organizaciones.length > 0 ? informe.organizaciones.join(', ') : 'Ninguna';
+        const unidades = informe.unidades && informe.unidades.length > 0 ? informe.unidades.join(', ') : 'Ninguna';
+        
+        let estadoBadge = '';
+        if (informe.tiene_unidades) {
+            estadoBadge = '<span class="badge badge-success">Con unidad</span>';
+        } else if (informe.tiene_organizaciones) {
+            estadoBadge = '<span class="badge badge-warning">Solo organización</span>';
+        } else {
+            estadoBadge = '<span class="badge badge-info">Sin asignaciones</span>';
+        }
+
+        return `
+            <div class="mobile-informe-card">
+                <div class="mobile-card-header">
+                    <h4 class="mobile-card-name">${informe.nombre} ${informe.apellido}</h4>
+                    <span class="mobile-card-date">${fecha}</span>
+                </div>
+                <div class="mobile-card-body">
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Organizaciones</span>
+                        <span class="mobile-card-value">${organizaciones}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Unidades</span>
+                        <span class="mobile-card-value">${unidades}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Estado</span>
+                        <span class="mobile-card-value">${estadoBadge}</span>
+                    </div>
+                </div>
+                <div class="mobile-card-footer">
+                    <button class="btn btn-primary btn-small" onclick="verInforme('${informe.id}')">
+                        👁️ Ver Detalles
+                    </button>
+                    <button class="btn btn-success btn-small" onclick="admin.marcarComoVisto('${informe.id}')">
+                        ✓ Marcar Visto
+                    </button>
+                </div>
+            </div>
         `;
     }
 
